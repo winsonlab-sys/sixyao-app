@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業六爻排盤系統 V6.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=0.85, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
+    <title>專業六爻排盤系統 V6.2</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -13,10 +13,10 @@
             max-width: 900px;
             margin: 0 auto;
         }
-        h1 { text-align: center; color: #ffca28; margin: 5px 0 15px 0; font-size: 24px; letter-spacing: 2px; }
+        h1 { text-align: center; color: #ffca28; margin: 5px 0 15px 0; font-size: 22px; letter-spacing: 2px; }
         .card {
             background: #1e1e1e;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             margin-bottom: 12px;
             border: 1px solid #333;
@@ -28,10 +28,10 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        label { font-size: 14px; color: #b0b0b0; width: 80px; font-weight: bold; }
+        label { font-size: 13px; color: #b0b0b0; width: 75px; font-weight: bold; }
         select, button, input {
-            padding: 8px;
-            font-size: 14px;
+            padding: 6px 8px;
+            font-size: 13px;
             border-radius: 4px;
             background: #2b2b2b;
             color: #fff;
@@ -49,14 +49,14 @@
         }
         button:hover { background-color: #ffa726; }
         button.secondary { background-color: #444; color: #fff; }
-        button.action-btn { background-color: #0284c7; color: #fff; font-size: 13px; padding: 6px 12px; }
+        button.action-btn { background-color: #0284c7; color: #fff; font-size: 12px; padding: 5px 10px; }
         button.action-btn:hover { background-color: #0369a1; }
         button.action-btn.active { background-color: #16a34a; }
         
         /* 手動由下而上選爻區域 */
         .manual-selectors {
             display: flex;
-            flex-direction: column; /* 調整為正常的column排列，靠HTML本身的順序達成初爻在下、上爻在上 */
+            flex-direction: column;
             gap: 6px;
             margin-top: 10px;
             background: #181818;
@@ -82,20 +82,21 @@
             border-color: #444;
         }
         
+        /* 【核心修改 2】稍微壓縮排盤結果的字體與內距，確保橫向一屏能完全容納 */
         .output-container {
             background-color: #f8fafc;
             color: #1e293b;
-            padding: 25px 25px;
+            padding: 15px 20px;
             border-radius: 6px;
             font-family: "PingFang TC", "Microsoft JhengHei", monospace;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            line-height: 1.8;
+            line-height: 1.6;
             border: 1px solid #cbd5e1;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
         }
         
-        .meta-section { margin-bottom: 15px; font-size: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .meta-section { margin-bottom: 10px; font-size: 13px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         .meta-line { margin-bottom: 4px; }
         .highlight-red { color: #dc2626; }
         .highlight-blue { color: #2563eb; }
@@ -103,24 +104,24 @@
         .paipan-grid { 
             display: flex; 
             width: 100%; 
-            margin-top: 10px; 
+            margin-top: 5px; 
             justify-content: flex-start;
         }
         
         .liushen-col { 
-            width: 55px; 
+            width: 50px; 
             display: flex; 
             flex-direction: column; 
             color: #475569; 
-            padding-top: 38px; 
+            padding-top: 32px; 
         }
         
         .fushen-col {
-            width: 110px;
+            width: 100px;
             display: none; 
             flex-direction: column;
             color: #b45309; 
-            padding-top: 38px;
+            padding-top: 32px;
             border-right: 1px dashed #cbd5e1;
             margin-right: 10px;
         }
@@ -135,31 +136,31 @@
         .gua-header { 
             display: flex; 
             border-bottom: 1px solid #cbd5e1; 
-            padding-bottom: 5px; 
-            margin-bottom: 10px; 
+            padding-bottom: 3px; 
+            margin-bottom: 8px; 
             color: #0f172a; 
         }
-        .gua-title { width: 45%; text-align: left; font-size: 16px; color: #0284c7; font-weight: 800; padding-left: 10px; }
+        .gua-title { width: 45%; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 10px; }
         .gua-title.change-title { width: 45%; text-align: left; padding-left: 45px; }
 
-        .yao-row { display: flex; align-items: center; height: 36px; }
+        .yao-row { display: flex; align-items: center; height: 32px; }
         .yao-part { width: 42%; display: flex; align-items: center; position: relative; }
         .yao-part.change-part { width: 46%; } 
         
-        .liuqin-zhi { width: 105px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
-        .nayin-box { width: 60px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: center; }
-        .yao-line-container { width: 90px; display: inline-flex; align-items: center; justify-content: center; }
-        .shi-ying { width: 30px; text-align: center; color: #b45309; font-size: 14px; }
-        .dong-mark { width: 35px; text-align: center; color: #dc2626; font-weight: bold; font-size: 15px; }
+        .liuqin-zhi { width: 95px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
+        .nayin-box { width: 55px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: center; }
+        .yao-line-container { width: 85px; display: inline-flex; align-items: center; justify-content: center; }
+        .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 13px; }
+        .dong-mark { width: 30px; text-align: center; color: #dc2626; font-weight: bold; font-size: 14px; }
         
-        .yao-line-pic { display: inline-block; height: 12px; vertical-align: middle; }
-        .yao-line-pic.yang { width: 80px; background-color: #000; }
-        .yao-line-pic.yin { width: 80px; background-image: linear-gradient(to right, #000 33.3%, transparent 33.3%, transparent 66.6%, #000 66.6%); }
+        .yao-line-pic { display: inline-block; height: 10px; vertical-align: middle; }
+        .yao-line-pic.yang { width: 75px; background-color: #000; }
+        .yao-line-pic.yin { width: 75px; background-image: linear-gradient(to right, #000 33.3%, transparent 33.3%, transparent 66.6%, #000 66.6%); }
 
-        .history-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .history-list { max-height: 150px; overflow-y: auto; margin-top: 10px; }
         .history-item { 
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px; background: #262626; border-bottom: 1px solid #333; font-size: 13px;
+            padding: 6px; background: #262626; border-bottom: 1px solid #333; font-size: 12px;
         }
         .history-item:hover { background: #333; }
         .history-info { flex: 1; cursor: pointer; }
@@ -186,18 +187,18 @@
 
         <div class="form-group">
             <label>對應干支：</label>
-            <span style="font-size:13px; color:#aaa;">月支:</span>
+            <span style="font-size:12px; color:#aaa;">月支:</span>
             <select id="month-zhi" onchange="updateDisplay()">
                 <option value="子">子月(十一月)</option><option value="丑">丑月(十二月)</option><option value="寅">寅月(正月)</option><option value="卯">卯月(二月)</option>
                 <option value="辰">辰月(三月)</option><option value="巳">巳月(四月)</option><option value="午">午月(五月)</option><option value="未">未月(六月)</option>
                 <option value="申">申月(七月)</option><option value="酉">酉月(八月)</option><option value="戌">戌月(九月)</option><option value="亥">亥月(十月)</option>
             </select>
-            <span style="font-size:13px; color:#aaa;">日課:</span>
+            <span style="font-size:12px; color:#aaa;">日課:</span>
             <select id="day-gan" onchange="updateDisplay()"></select>
             <select id="day-zhi" onchange="updateDisplay()"></select>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 15px;">
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
             <button style="flex: 2;" onclick="autoRoll()">電腦起卦 (隨機產生六爻)</button>
             <button class="secondary" style="flex: 1;" onclick="manualSubmit();">手動排盤</button>
         </div>
@@ -241,8 +242,8 @@
 
     <div class="card" style="margin-top:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:5px;">
-            <h3 style="margin:0; font-size:16px; color:#ffca28;">歷史占卦紀錄</h3>
-            <button style="font-size:11px; padding:3px 8px; background:#dc2626; color:#fff;" onclick="clearHistory()">清空紀錄</button>
+            <h3 style="margin:0; font-size:14px; color:#ffca28;">歷史占卦紀錄</h3>
+            <button style="font-size:11px; padding:2px 6px; background:#dc2626; color:#fff;" onclick="clearHistory()">清空紀錄</button>
         </div>
         <div id="history-container" class="history-list"></div>
     </div>
@@ -332,7 +333,6 @@
         gans.forEach(g => dgSel.options.add(new Option(g, g)));
         zhis.forEach(z => dzSel.options.add(new Option(z, z)));
 
-        // 初始化 6 個選爻下拉選單
         for(let i=0; i<6; i++) {
             let ySelect = document.getElementById(`yao-${i}`);
             yaoOptions.forEach(opt => {
@@ -350,7 +350,7 @@
 
         syncGanZhi(); 
         renderHistory();
-        updateDisplay(); // 預設進來顯示乾卦
+        updateDisplay(); 
     };
 
     function syncGanZhi() {
@@ -386,8 +386,6 @@
         return gans[(startIdx + offset) % 10];
     }
 
-    // 移除原有的 syncSelectorsToGua() 自動刷新邏輯
-    // 改為點擊「手動排盤」按鈕時才讀取下拉選單的值並刷新
     function manualSubmit() {
         for(let i=0; i<6; i++) {
             currentGua[i] = parseInt(document.getElementById(`yao-${i}`).value);
@@ -396,7 +394,6 @@
         saveToHistory();
     }
 
-    // 當電腦隨機起卦或點選歷史紀錄時，用來將數值填回下拉選單中
     function syncGuaToSelectors() {
         for(let i=0; i<6; i++) {
             document.getElementById(`yao-${i}`).value = currentGua[i];
@@ -407,7 +404,7 @@
         currentGua = []; 
         for(let i=0; i<6; i++) currentGua.push(Math.floor(Math.random()*4)); 
         syncGuaToSelectors(); 
-        updateDisplay(); // 電腦起卦直接展現
+        updateDisplay(); 
         saveToHistory();
     }
 
@@ -636,7 +633,7 @@
         htm += `  <div class="meta-line"><b>占事備忘：</b><span class="highlight-blue">${memo}</span></div>`;
         htm += `  <div class="meta-line"><b>西元時間：</b>${year} 年 ${month} 月 ${date} 日 ${hourVal} 時 ${minVal} 分</div>`;
         htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGZ}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
-        htm += `  <div class="meta-line" style="margin-top:6px; font-weight:normal; color:#475569;"><b>精算神煞：</b>`;
+        htm += `  <div class="meta-line" style="margin-top:4px; font-weight:normal; color:#475569;"><b>精算神煞：</b>`;
         htm += `貴人-${sha["貴人"]} &nbsp;祿神-${sha["日祿"]} &nbsp;羊刃-${sha["羊刃"]} &nbsp;文昌-${sha["文昌"]} &nbsp;驛馬-${sha["驛馬"]} &nbsp;桃花-${sha["桃花"]} &nbsp;將星-${sha["將星"]} &nbsp;華蓋-${sha["華蓋"]}<br>`;
         htm += `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;災煞-${sha["災煞"]} &nbsp;劫煞-${sha["劫煞"]} &nbsp;謀星-${sha["謀星"]} &nbsp;天醫-${sha["天醫"]} &nbsp;天喜-${sha["天喜"]}`;
         htm += `  </div>`;
@@ -727,7 +724,6 @@
         };
 
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        // 檢查防重複寫入（如果是初始化載入或剛存過相同的，可作基本過濾）
         if (history.length > 0 && history[0].memo === memo && history[0].gua.toString() === currentGua.toString()) {
             return; 
         }
@@ -741,7 +737,7 @@
         let container = document.getElementById("history-container");
         
         if(history.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#666; padding:10px; font-size:13px;">暫無占卦紀錄</div>`;
+            container.innerHTML = `<div style="text-align:center; color:#666; padding:10px; font-size:12px;">暫無占卦紀錄</div>`;
             return;
         }
 
@@ -751,7 +747,7 @@
                     <span style="color:#ff9800; font-weight:bold;">● [${item.date}]</span> 
                     <span style="color:#fff; margin-left:5px;">${item.memo}</span>
                 </div>
-                <button style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;" onclick="deleteHistory(${item.id})">刪除</button>
+                <button style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px;" onclick="deleteHistory(${item.id})">刪除</button>
             </div>
         `).join("");
     }
