@@ -29,6 +29,9 @@ jobs:
           cordova platform add android
           rm -rf www/*
           cp ../index.html www/
+          
+          # 【核心修改】使用 sed 指令在 config.xml 中加入鎖定橫向 (landscape) 的設定
+          sed -i '/<\/widget>/i \    <preference name="Orientation" value="landscape" \/>' config.xml
 
       - name: Build APK
         run: |
