@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=0.85, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
+    <title>專業六爻排盤系統 V6.3</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -12,6 +12,9 @@
             padding: 10px;
             max-width: 900px;
             margin: 0 auto;
+            /* 允許網頁層級縮放後的平滑轉場 */
+            transform-origin: top center;
+            transition: transform 0.1s ease-out;
         }
         h1 { text-align: center; color: #ffca28; margin: 5px 0 15px 0; font-size: 22px; letter-spacing: 2px; }
         .card {
@@ -82,7 +85,7 @@
             border-color: #444;
         }
         
-        /* 【核心修改 2】稍微壓縮排盤結果的字體與內距，確保橫向一屏能完全容納 */
+        /* 排盤結果區塊 */
         .output-container {
             background-color: #f8fafc;
             color: #1e293b;
@@ -94,12 +97,25 @@
             line-height: 1.6;
             border: 1px solid #cbd5e1;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            max-width: 100%;
+            box-sizing: border-box;
         }
         
         .meta-section { margin-bottom: 10px; font-size: 13px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         .meta-line { margin-bottom: 4px; }
         .highlight-red { color: #dc2626; }
         .highlight-blue { color: #2563eb; }
+        
+        /* 神煞行預設為隱藏 */
+        .shensha-line {
+            display: none;
+            margin-top: 4px; 
+            font-weight: normal; 
+            color: #475569;
+            background-color: #f1f5f9;
+            padding: 6px;
+            border-radius: 4px;
+        }
         
         .paipan-grid { 
             display: flex; 
@@ -130,7 +146,7 @@
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            max-width: 720px;
+            max-width: 100%;
         }
         
         .gua-header { 
@@ -164,6 +180,34 @@
         }
         .history-item:hover { background: #333; }
         .history-info { flex: 1; cursor: pointer; }
+
+        /* 右下角固定縮放控制按鈕 (防縮放失常終極大招) */
+        .zoom-controls {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.6);
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .zoom-btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            width: 38px;
+            height: 38px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .zoom-btn:active { background: #ff9800; color: #000; }
     </style>
 </head>
 <body>
@@ -232,6 +276,7 @@
     </div>
 
     <div id="board-controls" style="margin-bottom:10px; display:none; text-align:right; gap:10px; justify-content:flex-end;">
+        <button id="btn-shensha" class="action-btn" onclick="toggleShensha()">顯示 神煞</button>
         <button id="btn-fushen" class="action-btn" onclick="toggleFushen()">顯示 伏神</button>
         <button id="btn-nayin" class="action-btn" onclick="toggleNayin()">顯示 納音</button>
     </div>
@@ -248,10 +293,18 @@
         <div id="history-container" class="history-list"></div>
     </div>
 
+    <div class="zoom-controls">
+        <div class="zoom-btn" onclick="adjustZoom(0.05)">＋</div>
+        <div class="zoom-btn" onclick="adjustZoom(-0.05)">－</div>
+        <div class="zoom-btn" style="font-size:11px;" onclick="resetZoom()">重設</div>
+    </div>
+
 <script>
     let currentGua = [1, 1, 1, 1, 1, 1]; 
     let showNayinState = false; 
     let showFushenState = false; 
+    let showShenshaState = false; // 神煞狀態預設隱藏
+    let currentScale = 0.90; // 預設最佳防溢出比例
 
     const gans = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
     const zhis = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -315,6 +368,19 @@
         { value: 0, text: "老陰 ( -- -- 變)" }
     ];
 
+    // JavaScript 精準網頁畫面縮放控制
+    function applyZoom() {
+        document.body.style.transform = `scale(${currentScale})`;
+    }
+    function adjustZoom(amount) {
+        currentScale = Math.min(Math.max(currentScale + amount, 0.4), 2.0);
+        applyZoom();
+    }
+    function resetZoom() {
+        currentScale = 0.90;
+        applyZoom();
+    }
+
     window.onload = function() {
         let ySel = document.getElementById("year");
         let mSel = document.getElementById("month");
@@ -350,6 +416,7 @@
 
         syncGanZhi(); 
         renderHistory();
+        applyZoom(); // 套用預設縮放
         updateDisplay(); 
     };
 
@@ -431,6 +498,23 @@
         } else {
             btn.classList.remove("active");
             btn.innerText = "顯示 伏神";
+        }
+    }
+
+    // 控制神煞顯示與隱藏
+    function toggleShensha() {
+        showShenshaState = !showShenshaState;
+        let btn = document.getElementById("btn-shensha");
+        let el = document.getElementById("shensha-line-id");
+        if(el) {
+            el.style.display = showShenshaState ? "block" : "none";
+        }
+        if(showShenshaState) {
+            btn.classList.add("active");
+            btn.innerText = "隱藏 神煞";
+        } else {
+            btn.classList.remove("active");
+            btn.innerText = "顯示 神煞";
         }
     }
 
@@ -633,9 +717,12 @@
         htm += `  <div class="meta-line"><b>占事備忘：</b><span class="highlight-blue">${memo}</span></div>`;
         htm += `  <div class="meta-line"><b>西元時間：</b>${year} 年 ${month} 月 ${date} 日 ${hourVal} 時 ${minVal} 分</div>`;
         htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGZ}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
-        htm += `  <div class="meta-line" style="margin-top:4px; font-weight:normal; color:#475569;"><b>精算神煞：</b>`;
+        
+        // 核心修改：神煞改用動態式隱藏/顯示
+        let ssDisplay = showShenshaState ? "block" : "none";
+        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};"><b>精算神煞：</b>`;
         htm += `貴人-${sha["貴人"]} &nbsp;祿神-${sha["日祿"]} &nbsp;羊刃-${sha["羊刃"]} &nbsp;文昌-${sha["文昌"]} &nbsp;驛馬-${sha["驛馬"]} &nbsp;桃花-${sha["桃花"]} &nbsp;將星-${sha["將星"]} &nbsp;華蓋-${sha["華蓋"]}<br>`;
-        htm += `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;災煞-${sha["災煞"]} &nbsp;劫煞-${sha["劫煞"]} &nbsp;謀星-${sha["謀星"]} &nbsp;天醫-${sha["天醫"]} &nbsp;天喜-${sha["天喜"]}`;
+        htm += `災煞-${sha["災煞"]} &nbsp;劫煞-${sha["劫煞"]} &nbsp;謀星-${sha["謀星"]} &nbsp;天醫-${sha["天醫"]} &nbsp;天喜-${sha["天喜"]}`;
         htm += `  </div>`;
         htm += `</div>`;
 
@@ -705,6 +792,7 @@
         
         if(showFushenState) document.getElementById("btn-fushen").classList.add("active");
         if(showNayinState) document.getElementById("btn-nayin").classList.add("active");
+        if(showShenshaState) document.getElementById("btn-shensha").classList.add("active");
     }
 
     function saveToHistory() {
