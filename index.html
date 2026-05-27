@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.7 (精簡版)</title>
+    <title>專業六爻排盤系統 V6.8 (完工精簡版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -124,7 +124,6 @@
             padding-top: 32px; 
         }
         
-        /* 藏爻/伏爻 雙色顯示欄位 */
         .fushen-col {
             width: 95px;
             display: none; 
@@ -174,7 +173,6 @@
         .history-item:hover { background: #333; }
         .history-info { flex: 1; cursor: pointer; }
 
-        /* 斷卦筆記樣式 */
         .notes-section {
             margin-top: 15px;
             border-top: 1px dashed #cbd5e1;
@@ -292,7 +290,6 @@
     <div id="paipan-board" class="output-container" style="display:none;">
         <div id="board-content"></div>
         
-        <!-- 斷卦筆記欄位 -->
         <div class="notes-section">
             <div class="notes-title">
                 <span>📝 斷卦筆記（內容自動儲存至當前紀錄）</span>
@@ -590,7 +587,6 @@
         return sha;
     }
 
-    // 藏爻邏輯同步精簡：移除 displayText 內部的天干 pureGans[i]
     function calculateCangYaoDetails(mainInfo) {
         let gongName = mainInfo.gong; 
         let gongWX = mainInfo.wuxing;
@@ -617,9 +613,7 @@
         for(let i=0; i<6; i++) {
             let pureLQ = getLiuQin(gongWX, pureZhis[i]);
             let pureWX = wuxing[pureZhis[i]];
-            // 簡化核心：僅保留 六親 + 地支 + 五行 (例如：子孫酉金)
             let displayText = `${pureLQ}${pureZhis[i]}${pureWX}`;
-            
             let isFuYao = !mainGuaLiuqins.includes(pureLQ);
             
             resultList.push({
@@ -701,7 +695,7 @@
             let yaoNum = currentGua[i];
             htm += `    <div class="yao-row">`;
 
-            // 本卦（精簡核心：移除 mainInfo.gans[i]）
+            // 本卦
             htm += `      <div class="yao-part">`;
             let mZhi = mainInfo.zhis[i];
             let mLiuQin = getLiuQin(mainInfo.wuxing, mZhi);
@@ -715,9 +709,9 @@
             htm += `        <span class="shi-ying">${mShiYing}</span>`;
             htm += `      </div>`;
 
-            // 變卦（精簡核心：移除 changeInfo.gans[i]）
+            // 變卦（核心修正：3 老陽變陰改為 ○➔，0 老陰變陽改為 ╳➔）
             htm += `      <div class="yao-part change-part">`;
-            let cMark = (yaoNum === 3) ? "╳➔" : ((yaoNum === 0) ? "○➔" : "  ");
+            let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
             let cZhi = changeInfo.zhis[i];
             let cLiuQin = getLiuQin(changeInfo.wuxing, cZhi);
             let cWX = wuxing[cZhi];
