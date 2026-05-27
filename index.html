@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.6</title>
+    <title>專業六爻排盤系統 V6.7 (精簡版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -126,7 +126,7 @@
         
         /* 藏爻/伏爻 雙色顯示欄位 */
         .fushen-col {
-            width: 110px;
+            width: 95px;
             display: none; 
             flex-direction: column;
             padding-top: 32px;
@@ -148,15 +148,15 @@
             margin-bottom: 8px; 
             color: #0f172a; 
         }
-        .gua-title { width: 260px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
-        .gua-title.change-title { width: 300px; padding-left: 20px; }
+        .gua-title { width: 200px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
+        .gua-title.change-title { width: 240px; padding-left: 20px; }
 
         .yao-row { display: flex; align-items: center; height: 32px; }
         
-        .yao-part { width: 260px; display: flex; align-items: center; position: relative; margin-right: 15px; }
-        .yao-part.change-part { width: 300px; margin-right: 0; } 
+        .yao-part { width: 200px; display: flex; align-items: center; position: relative; margin-right: 15px; }
+        .yao-part.change-part { width: 240px; margin-right: 0; } 
         
-        .liuqin-zhi { width: 95px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
+        .liuqin-zhi { width: 75px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
         .nayin-box { width: 65px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: left; }
         .yao-line-container { width: 85px; display: inline-flex; align-items: center; justify-content: center; }
         .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 13px; }
@@ -292,6 +292,7 @@
     <div id="paipan-board" class="output-container" style="display:none;">
         <div id="board-content"></div>
         
+        <!-- 斷卦筆記欄位 -->
         <div class="notes-section">
             <div class="notes-title">
                 <span>📝 斷卦筆記（內容自動儲存至當前紀錄）</span>
@@ -318,7 +319,7 @@
 <script>
     let currentGua = [1, 1, 1, 1, 1, 1]; 
     let showNayinState = false; 
-    let showFushenState = false; // 此處代表「顯示藏爻」開關
+    let showFushenState = false; 
     let showShenshaState = false; 
     let currentScale = 0.90; 
     let currentRecordId = null; 
@@ -589,18 +590,16 @@
         return sha;
     }
 
-    // V6.6 核心修改：計算本宮全體藏爻，並智慧雙色判定伏爻
+    // 藏爻邏輯同步精簡：移除 displayText 內部的天干 pureGans[i]
     function calculateCangYaoDetails(mainInfo) {
         let gongName = mainInfo.gong; 
         let gongWX = mainInfo.wuxing;
         
-        // 1. 取得主卦中實際存在的所有六親，以便檢查是否「缺少六親」
         let mainGuaLiuqins = [];
         for(let i=0; i<6; i++) {
             mainGuaLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i]));
         }
 
-        // 2. 取得大本營「八純首卦」的原始配卦結構
         let pureArr = [];
         if(gongName==="乾") pureArr=[1,1,1,1,1,1]; else if(gongName==="坤") pureArr=[0,0,0,0,0,0];
         else if(gongName==="震") pureArr=[1,0,0,1,0,0]; else if(gongName==="巽") pureArr=[0,1,1,0,1,1];
@@ -612,17 +611,15 @@
         let lowData = naJiaBase[lowName].low; 
         let upData = naJiaBase[upName].up;
         
-        let pureGans = [...lowData.gan, ...upData.gan]; 
         let pureZhis = [...lowData.zhi, ...upData.zhi];
 
-        // 3. 逐爻計算藏爻內容，並進行雙色歸類
-        let resultList = []; // 存放每爻的物件 { text: "...", isFu: true/false }
+        let resultList = []; 
         for(let i=0; i<6; i++) {
             let pureLQ = getLiuQin(gongWX, pureZhis[i]);
             let pureWX = wuxing[pureZhis[i]];
-            let displayText = `${pureLQ}${pureGans[i]}${pureZhis[i]}${pureWX}`;
+            // 簡化核心：僅保留 六親 + 地支 + 五行 (例如：子孫酉金)
+            let displayText = `${pureLQ}${pureZhis[i]}${pureWX}`;
             
-            // 關鍵邏輯：如果這個六親在主卦(飛神)中完全沒出現，就是傳統的「伏爻(伏神)」
             let isFuYao = !mainGuaLiuqins.includes(pureLQ);
             
             resultList.push({
@@ -664,7 +661,6 @@
         let mainInfo = buildGuaDetails(mainGuaArr);
         let changeInfo = buildGuaDetails(changeGuaArr);
 
-        // 呼叫 V6.6 新藏爻邏輯
         let cangYaoData = calculateCangYaoDetails(mainInfo);
 
         let htm = "";
@@ -685,14 +681,12 @@
         for(let i=5; i>=0; i--) { htm += `    <div class="yao-row">${liuShouArr[(liuShouOrder + i) % 6]}</div>`; }
         htm += `  </div>`;
 
-        // 藏爻欄位（點擊按鈕切換顯示/隱藏）
         let fDisplay = showFushenState ? "flex" : "none";
         htm += `  <div class="fushen-col" id="fushen-col-id" style="display:${fDisplay};">`;
         for(let i=5; i>=0; i--) { 
             let yaoObj = cangYaoData[i];
-            // 雙色渲染：若是核心伏爻用綠色，若是一般藏爻用低調灰色
             let textColor = yaoObj.isFu ? "#16a34a" : "#64748b";
-            let prefix = yaoObj.isFu ? "★" : "　"; // 伏爻加上星號利於快速識別
+            let prefix = yaoObj.isFu ? "★" : "　"; 
             htm += `    <div class="yao-row" style="color:${textColor}; font-weight:${yaoObj.isFu?'bold':'normal'};">${prefix}${yaoObj.text}</div>`; 
         }
         htm += `  </div>`;
@@ -707,7 +701,7 @@
             let yaoNum = currentGua[i];
             htm += `    <div class="yao-row">`;
 
-            // 本卦
+            // 本卦（精簡核心：移除 mainInfo.gans[i]）
             htm += `      <div class="yao-part">`;
             let mZhi = mainInfo.zhis[i];
             let mLiuQin = getLiuQin(mainInfo.wuxing, mZhi);
@@ -715,13 +709,13 @@
             let mShiYing = (mainInfo.shi === (i+1)) ? "世" : (((mainInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
             let mNY = nayinMap[mainInfo.gans[i] + mZhi] || "";
 
-            htm += `        <span class="liuqin-zhi">${mLiuQin}${mainInfo.gans[i]}${mZhi}${mWX}</span>`;
+            htm += `        <span class="liuqin-zhi">${mLiuQin}${mZhi}${mWX}</span>`;
             htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${mNY}]</span>`;
             htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(yaoNum===1||yaoNum===3)?'yang':'yin'}"></span></span>`;
             htm += `        <span class="shi-ying">${mShiYing}</span>`;
             htm += `      </div>`;
 
-            // 變卦
+            // 變卦（精簡核心：移除 changeInfo.gans[i]）
             htm += `      <div class="yao-part change-part">`;
             let cMark = (yaoNum === 3) ? "╳➔" : ((yaoNum === 0) ? "○➔" : "  ");
             let cZhi = changeInfo.zhis[i];
@@ -731,7 +725,7 @@
             let cNY = nayinMap[changeInfo.gans[i] + cZhi] || "";
 
             htm += `        <span class="dong-mark">${cMark}</span>`;
-            htm += `        <span class="liuqin-zhi">${cLiuQin}${changeInfo.gans[i]}${cZhi}${cWX}</span>`;
+            htm += `        <span class="liuqin-zhi">${cLiuQin}${cZhi}${cWX}</span>`;
             htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${cNY}]</span>`;
             htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(changeGuaArr[i]===1)?'yang':'yin'}"></span></span>`;
             htm += `        <span class="shi-ying">${cShiYing}</span>`;
