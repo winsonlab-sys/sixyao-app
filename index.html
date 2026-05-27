@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.5</title>
+    <title>專業六爻排盤系統 V6.6</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -124,11 +124,11 @@
             padding-top: 32px; 
         }
         
+        /* 藏爻/伏爻 雙色顯示欄位 */
         .fushen-col {
-            width: 100px;
+            width: 110px;
             display: none; 
             flex-direction: column;
-            color: #b45309; 
             padding-top: 32px;
             border-right: 1px dashed #cbd5e1;
             margin-right: 10px;
@@ -285,14 +285,13 @@
 
     <div id="board-controls" style="margin-bottom:10px; display:none; text-align:right; gap:10px; justify-content:flex-end;">
         <button id="btn-shensha" class="action-btn" onclick="toggleShensha()">顯示 神煞</button>
-        <button id="btn-fushen" class="action-btn" onclick="toggleFushen()">顯示 伏神</button>
+        <button id="btn-fushen" class="action-btn" onclick="toggleFushen()">顯示 藏爻</button>
         <button id="btn-nayin" class="action-btn" onclick="toggleNayin()">顯示 納音</button>
     </div>
 
     <div id="paipan-board" class="output-container" style="display:none;">
         <div id="board-content"></div>
         
-        <!-- 斷卦筆記欄位 -->
         <div class="notes-section">
             <div class="notes-title">
                 <span>📝 斷卦筆記（內容自動儲存至當前紀錄）</span>
@@ -319,10 +318,10 @@
 <script>
     let currentGua = [1, 1, 1, 1, 1, 1]; 
     let showNayinState = false; 
-    let showFushenState = false; 
+    let showFushenState = false; // 此處代表「顯示藏爻」開關
     let showShenshaState = false; 
     let currentScale = 0.90; 
-    let currentRecordId = null; // 追蹤當前正在檢視的歷史紀錄 ID
+    let currentRecordId = null; 
 
     const gans = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
     const zhis = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -359,7 +358,7 @@
         "離震":"火雷噬嗑", "艮離":"山火賁", "艮坤":"山地剝", "坤震":"地雷復", "乾震":"天雷無妄", "艮乾":"山天大畜", "艮震":"山雷頤", "兌巽":"澤風大過",
         "坎艮":"水山蹇", "震坎":"雷水解", "艮兌":"山澤損", "震乾":"雷天大壯", "離坤":"火地晉", "坤離":"地火明夷", "巽離":"風火家人", "離兌":"火澤睽",
         "坎兌":"水澤節", "巽兌":"風澤中孚", "震艮":"雷山小過", "坎離":"水火既濟", "離坎":"火水未濟", "乾巽":"天風姤", "兌坤":"澤地萃", "坤巽":"地風升",
-        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天夬", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
+        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天嬖", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
@@ -461,8 +460,8 @@
 
     function manualSubmit() {
         for(let i=0; i<6; i++) { currentGua[i] = parseInt(document.getElementById(`yao-${i}`).value); }
-        currentRecordId = Date.now(); // 產生全新紀錄 ID
-        document.getElementById("gua-notes").value = ""; // 清空舊筆記
+        currentRecordId = Date.now(); 
+        document.getElementById("gua-notes").value = ""; 
         updateDisplay();
         saveToHistory();
     }
@@ -475,8 +474,8 @@
         currentGua = []; 
         for(let i=0; i<6; i++) currentGua.push(Math.floor(Math.random()*4)); 
         syncGuaToSelectors(); 
-        currentRecordId = Date.now(); // 產生全新紀錄 ID
-        document.getElementById("gua-notes").value = ""; // 清空舊筆記
+        currentRecordId = Date.now(); 
+        document.getElementById("gua-notes").value = ""; 
         updateDisplay(); 
         saveToHistory();
     }
@@ -494,7 +493,7 @@
         let btn = document.getElementById("btn-fushen");
         let fCol = document.getElementById("fushen-col-id");
         if(fCol) { fCol.style.display = showFushenState ? "flex" : "none"; }
-        if(showFushenState) { btn.classList.add("active"); btn.innerText = "隱藏 伏神"; } else { btn.classList.remove("active"); btn.innerText = "顯示 伏神"; }
+        if(showFushenState) { btn.classList.add("active"); btn.innerText = "隱藏 藏爻"; } else { btn.classList.remove("active"); btn.innerText = "顯示 藏爻"; }
     }
 
     function toggleShensha() {
@@ -590,24 +589,48 @@
         return sha;
     }
 
-    function calculateFushen(mainInfo) {
-        let gongName = mainInfo.gong; let gongWX = mainInfo.wuxing;
+    // V6.6 核心修改：計算本宮全體藏爻，並智慧雙色判定伏爻
+    function calculateCangYaoDetails(mainInfo) {
+        let gongName = mainInfo.gong; 
+        let gongWX = mainInfo.wuxing;
+        
+        // 1. 取得主卦中實際存在的所有六親，以便檢查是否「缺少六親」
+        let mainGuaLiuqins = [];
+        for(let i=0; i<6; i++) {
+            mainGuaLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i]));
+        }
+
+        // 2. 取得大本營「八純首卦」的原始配卦結構
         let pureArr = [];
         if(gongName==="乾") pureArr=[1,1,1,1,1,1]; else if(gongName==="坤") pureArr=[0,0,0,0,0,0];
         else if(gongName==="震") pureArr=[1,0,0,1,0,0]; else if(gongName==="巽") pureArr=[0,1,1,0,1,1];
         else if(gongName==="坎") pureArr=[0,1,0,0,1,0]; else if(gongName==="離") pureArr=[1,0,1,1,0,1];
         else if(gongName==="艮") pureArr=[1,0,0,1,0,0]; else if(gongName==="兌") pureArr=[0,1,1,0,1,1];
-        let lowName = baguaCode[pureArr.slice(0,3).join("")]; let upName = baguaCode[pureArr.slice(3,6).join("")];
-        let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
-        let pureGans = [...lowData.gan, ...upData.gan]; let pureZhis = [...lowData.zhi, ...upData.zhi];
-        let mainLiuqins = [];
-        for(let i=0; i<6; i++) { mainLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i])); }
-        let fushenList = ["", "", "", "", "", ""];
+        
+        let lowName = baguaCode[pureArr.slice(0,3).join("")]; 
+        let upName = baguaCode[pureArr.slice(3,6).join("")];
+        let lowData = naJiaBase[lowName].low; 
+        let upData = naJiaBase[upName].up;
+        
+        let pureGans = [...lowData.gan, ...upData.gan]; 
+        let pureZhis = [...lowData.zhi, ...upData.zhi];
+
+        // 3. 逐爻計算藏爻內容，並進行雙色歸類
+        let resultList = []; // 存放每爻的物件 { text: "...", isFu: true/false }
         for(let i=0; i<6; i++) {
             let pureLQ = getLiuQin(gongWX, pureZhis[i]);
-            if (!mainLiuqins.includes(pureLQ)) { fushenList[i] = `${pureLQ}${pureGans[i]}${pureZhis[i]}${wuxing[pureZhis[i]]}`; }
+            let pureWX = wuxing[pureZhis[i]];
+            let displayText = `${pureLQ}${pureGans[i]}${pureZhis[i]}${pureWX}`;
+            
+            // 關鍵邏輯：如果這個六親在主卦(飛神)中完全沒出現，就是傳統的「伏爻(伏神)」
+            let isFuYao = !mainGuaLiuqins.includes(pureLQ);
+            
+            resultList.push({
+                text: displayText,
+                isFu: isFuYao
+            });
         }
-        return fushenList;
+        return resultList;
     }
 
     function updateDisplay() {
@@ -641,7 +664,8 @@
         let mainInfo = buildGuaDetails(mainGuaArr);
         let changeInfo = buildGuaDetails(changeGuaArr);
 
-        let fushenData = calculateFushen(mainInfo);
+        // 呼叫 V6.6 新藏爻邏輯
+        let cangYaoData = calculateCangYaoDetails(mainInfo);
 
         let htm = "";
         htm += `<div class="meta-section">`;
@@ -661,9 +685,16 @@
         for(let i=5; i>=0; i--) { htm += `    <div class="yao-row">${liuShouArr[(liuShouOrder + i) % 6]}</div>`; }
         htm += `  </div>`;
 
+        // 藏爻欄位（點擊按鈕切換顯示/隱藏）
         let fDisplay = showFushenState ? "flex" : "none";
         htm += `  <div class="fushen-col" id="fushen-col-id" style="display:${fDisplay};">`;
-        for(let i=5; i>=0; i--) { let fsText = fushenData[i] ? fushenData[i] : "&nbsp;"; htm += `    <div class="yao-row">${fsText}</div>`; }
+        for(let i=5; i>=0; i--) { 
+            let yaoObj = cangYaoData[i];
+            // 雙色渲染：若是核心伏爻用綠色，若是一般藏爻用低調灰色
+            let textColor = yaoObj.isFu ? "#16a34a" : "#64748b";
+            let prefix = yaoObj.isFu ? "★" : "　"; // 伏爻加上星號利於快速識別
+            htm += `    <div class="yao-row" style="color:${textColor}; font-weight:${yaoObj.isFu?'bold':'normal'};">${prefix}${yaoObj.text}</div>`; 
+        }
         htm += `  </div>`;
 
         htm += `  <div class="gua-col">`;
@@ -716,20 +747,23 @@
         document.getElementById("paipan-board").style.display = "block";
         document.getElementById("board-controls").style.display = "flex";
         
-        if(showFushenState) document.getElementById("btn-fushen").classList.add("active");
+        if(showFushenState) {
+            document.getElementById("btn-fushen").classList.add("active");
+            document.getElementById("btn-fushen").innerText = "隱藏 藏爻";
+        } else {
+            document.getElementById("btn-fushen").classList.remove("active");
+            document.getElementById("btn-fushen").innerText = "顯示 藏爻";
+        }
         if(showNayinState) document.getElementById("btn-nayin").classList.add("active");
         if(showShenshaState) document.getElementById("btn-shensha").classList.add("active");
     }
 
-    // 儲存至LocalStorage（包含筆記欄位）
     function saveToHistory() {
         let memo = document.getElementById("memo").value || "未命名占卜";
         let dateStr = `${document.getElementById("year").value}/${document.getElementById("month").value}/${document.getElementById("date").value}`;
         let notes = document.getElementById("gua-notes").value;
 
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        
-        // 檢查是否是已存在的紀錄在進行編輯
         let existingIndex = history.findIndex(x => x.id === currentRecordId);
 
         let record = {
@@ -742,10 +776,9 @@
         };
 
         if (existingIndex !== -1) {
-            history[existingIndex] = record; // 更新現有紀錄
+            history[existingIndex] = record; 
         } else {
-            currentRecordId = record.id; // 鎖定當前 ID
-            // 防止重複按鈕點擊產生一模一樣的冗餘空白紀錄
+            currentRecordId = record.id; 
             if (history.length > 0 && history[0].memo === memo && history[0].gua.toString() === currentGua.toString() && !notes) { return; }
             history.unshift(record);
         }
@@ -754,11 +787,8 @@
         renderHistory();
     }
 
-    // 當打字輸入筆記時，即時自動儲存
     function autoSaveNotes() {
-        if (!currentRecordId) {
-            currentRecordId = Date.now(); // 如果是全新排盤還沒入庫，給它一個識別碼
-        }
+        if (!currentRecordId) { currentRecordId = Date.now(); }
         saveToHistory();
         
         let statusSpan = document.getElementById("save-status");
@@ -782,12 +812,11 @@
         `).join("");
     }
 
-    // 回溯歷史紀錄（還原卦象、基本資料與筆記文字欄）
     function loadHistory(id) {
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
         let item = history.find(x => x.id === id); if(!item) return;
         
-        currentRecordId = item.id; // 綁定當前追蹤的歷史識別碼
+        currentRecordId = item.id; 
         document.getElementById("memo").value = item.memo;
         let parts = item.date.split("/");
         document.getElementById("year").value = parts[0]; document.getElementById("month").value = parts[1]; document.getElementById("date").value = parts[2];
@@ -796,19 +825,17 @@
         
         currentGua = [...item.gua]; 
         syncGuaToSelectors(); 
-        
-        // 還原歷史筆記欄文字（若無則清空）
         document.getElementById("gua-notes").value = item.notes || "";
         
         updateDisplay();
     }
 
     function deleteHistory(id, event) {
-        if(event) event.stopPropagation(); // 防止觸發外層的點擊讀取
+        if(event) event.stopPropagation(); 
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
         history = history.filter(x => x.id !== id); 
         localStorage.setItem("sixyao_history", JSON.stringify(history)); 
-        if(currentRecordId === id) { currentRecordId = null; } // 若刪除的是當前檢視卦，清除追蹤
+        if(currentRecordId === id) { currentRecordId = null; } 
         renderHistory();
     }
 
