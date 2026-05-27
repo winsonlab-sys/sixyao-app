@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.3</title>
+    <title>專業六爻排盤系統 V6.5</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -12,7 +12,6 @@
             padding: 10px;
             max-width: 900px;
             margin: 0 auto;
-            /* 允許網頁層級縮放後的平滑轉場 */
             transform-origin: top center;
             transition: transform 0.1s ease-out;
         }
@@ -32,7 +31,7 @@
             flex-wrap: wrap;
         }
         label { font-size: 13px; color: #b0b0b0; width: 75px; font-weight: bold; }
-        select, button, input {
+        select, button, input, textarea {
             padding: 6px 8px;
             font-size: 13px;
             border-radius: 4px;
@@ -42,6 +41,15 @@
         }
         select { flex: 1; min-width: 65px; }
         input[type="text"] { flex: 1; background: #151515; border: 1px solid #555; color: #fff; }
+        textarea { 
+            width: 100%; 
+            box-sizing: border-box; 
+            background: #151515; 
+            border: 1px solid #555; 
+            color: #fff; 
+            font-family: inherit;
+            resize: vertical;
+        }
         button {
             background-color: #ff9800;
             color: #000;
@@ -56,7 +64,6 @@
         button.action-btn:hover { background-color: #0369a1; }
         button.action-btn.active { background-color: #16a34a; }
         
-        /* 手動由下而上選爻區域 */
         .manual-selectors {
             display: flex;
             flex-direction: column;
@@ -67,23 +74,9 @@
             border-radius: 6px;
             border: 1px solid #2a2a2a;
         }
-        .yao-select-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .yao-label {
-            width: 50px;
-            font-size: 13px;
-            color: #ffca28;
-            font-weight: bold;
-            text-align: right;
-        }
-        .yao-select-row select {
-            flex: 1;
-            background: #222;
-            border-color: #444;
-        }
+        .yao-select-row { display: flex; align-items: center; gap: 10px; }
+        .yao-label { width: 50px; font-size: 13px; color: #ffca28; font-weight: bold; text-align: right; }
+        .yao-select-row select { flex: 1; background: #222; border-color: #444; }
         
         /* 排盤結果區塊 */
         .output-container {
@@ -106,7 +99,6 @@
         .highlight-red { color: #dc2626; }
         .highlight-blue { color: #2563eb; }
         
-        /* 神煞行預設為隱藏 */
         .shensha-line {
             display: none;
             margin-top: 4px; 
@@ -125,7 +117,7 @@
         }
         
         .liushen-col { 
-            width: 50px; 
+            width: 55px; 
             display: flex; 
             flex-direction: column; 
             color: #475569; 
@@ -156,18 +148,19 @@
             margin-bottom: 8px; 
             color: #0f172a; 
         }
-        .gua-title { width: 45%; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 10px; }
-        .gua-title.change-title { width: 45%; text-align: left; padding-left: 45px; }
+        .gua-title { width: 260px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
+        .gua-title.change-title { width: 300px; padding-left: 20px; }
 
         .yao-row { display: flex; align-items: center; height: 32px; }
-        .yao-part { width: 42%; display: flex; align-items: center; position: relative; }
-        .yao-part.change-part { width: 46%; } 
+        
+        .yao-part { width: 260px; display: flex; align-items: center; position: relative; margin-right: 15px; }
+        .yao-part.change-part { width: 300px; margin-right: 0; } 
         
         .liuqin-zhi { width: 95px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
-        .nayin-box { width: 55px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: center; }
+        .nayin-box { width: 65px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: left; }
         .yao-line-container { width: 85px; display: inline-flex; align-items: center; justify-content: center; }
         .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 13px; }
-        .dong-mark { width: 30px; text-align: center; color: #dc2626; font-weight: bold; font-size: 14px; }
+        .dong-mark { width: 35px; text-align: center; color: #dc2626; font-weight: bold; font-size: 14px; }
         
         .yao-line-pic { display: inline-block; height: 10px; vertical-align: middle; }
         .yao-line-pic.yang { width: 75px; background-color: #000; }
@@ -181,7 +174,22 @@
         .history-item:hover { background: #333; }
         .history-info { flex: 1; cursor: pointer; }
 
-        /* 右下角固定縮放控制按鈕 (防縮放失常終極大招) */
+        /* 斷卦筆記樣式 */
+        .notes-section {
+            margin-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 12px;
+            color: #1e293b;
+        }
+        .notes-title {
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .zoom-controls {
             position: fixed;
             bottom: 15px;
@@ -283,6 +291,15 @@
 
     <div id="paipan-board" class="output-container" style="display:none;">
         <div id="board-content"></div>
+        
+        <!-- 斷卦筆記欄位 -->
+        <div class="notes-section">
+            <div class="notes-title">
+                <span>📝 斷卦筆記（內容自動儲存至當前紀錄）</span>
+                <span id="save-status" style="color: #16a34a; font-weight: normal; font-size: 11px;"></span>
+            </div>
+            <textarea id="gua-notes" rows="4" placeholder="在此輸入此卦的吉凶判斷、應期、神煞取用等分析..." oninput="autoSaveNotes()"></textarea>
+        </div>
     </div>
 
     <div class="card" style="margin-top:15px;">
@@ -303,8 +320,9 @@
     let currentGua = [1, 1, 1, 1, 1, 1]; 
     let showNayinState = false; 
     let showFushenState = false; 
-    let showShenshaState = false; // 神煞狀態預設隱藏
-    let currentScale = 0.90; // 預設最佳防溢出比例
+    let showShenshaState = false; 
+    let currentScale = 0.90; 
+    let currentRecordId = null; // 追蹤當前正在檢視的歷史紀錄 ID
 
     const gans = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
     const zhis = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -328,7 +346,7 @@
         "坤": { low: { gan:["乙","乙","乙"], zhi:["未","巳","卯"] }, up: { gan:["癸","癸","癸"], zhi:["丑","亥","酉"] }, wuxing:"土" },
         "巽": { low: { gan:["辛","辛","辛"], zhi:["丑","亥","酉"] }, up: { gan:["辛","辛","辛"], zhi:["未","巳","卯"] }, wuxing:"木" },
         "離": { low: { gan:["己","己","己"], zhi:["卯","丑","亥"] }, up: { gan:["己","己","己"], zhi:["酉","未","巳"] }, wuxing:"火" },
-        "兌": { low: { gan:["丁","丁","丁"], zhi:["巳","卯","丑"] }, up: { gan:["丁","丁","亥"], zhi:["亥","酉","未"] }, wuxing:"金" }
+        "兌": { low: { gan:["丁","丁","丁"], zhi:["巳","卯","丑"] }, up: { gan:["丁","丁","丁"], zhi:["亥","酉","未"] }, wuxing:"金" }
     };
 
     const baguaCode = {"111":"乾", "000":"坤", "100":"震", "011":"巽", "010":"坎", "101":"離", "001":"艮", "110":"兌"};
@@ -341,7 +359,7 @@
         "離震":"火雷噬嗑", "艮離":"山火賁", "艮坤":"山地剝", "坤震":"地雷復", "乾震":"天雷無妄", "艮乾":"山天大畜", "艮震":"山雷頤", "兌巽":"澤風大過",
         "坎艮":"水山蹇", "震坎":"雷水解", "艮兌":"山澤損", "震乾":"雷天大壯", "離坤":"火地晉", "坤離":"地火明夷", "巽離":"風火家人", "離兌":"火澤睽",
         "坎兌":"水澤節", "巽兌":"風澤中孚", "震艮":"雷山小過", "坎離":"水火既濟", "離坎":"火水未濟", "乾巽":"天風姤", "兌坤":"澤地萃", "坤巽":"地風升",
-        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天嬖", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
+        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天夬", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
@@ -368,18 +386,9 @@
         { value: 0, text: "老陰 ( -- -- 變)" }
     ];
 
-    // JavaScript 精準網頁畫面縮放控制
-    function applyZoom() {
-        document.body.style.transform = `scale(${currentScale})`;
-    }
-    function adjustZoom(amount) {
-        currentScale = Math.min(Math.max(currentScale + amount, 0.4), 2.0);
-        applyZoom();
-    }
-    function resetZoom() {
-        currentScale = 0.90;
-        applyZoom();
-    }
+    function applyZoom() { document.body.style.transform = `scale(${currentScale})`; }
+    function adjustZoom(amount) { currentScale = Math.min(Math.max(currentScale + amount, 0.4), 2.0); applyZoom(); }
+    function resetZoom() { currentScale = 0.90; applyZoom(); }
 
     window.onload = function() {
         let ySel = document.getElementById("year");
@@ -401,9 +410,7 @@
 
         for(let i=0; i<6; i++) {
             let ySelect = document.getElementById(`yao-${i}`);
-            yaoOptions.forEach(opt => {
-                ySelect.options.add(new Option(opt.text, opt.value));
-            });
+            yaoOptions.forEach(opt => { ySelect.options.add(new Option(opt.text, opt.value)); });
             ySelect.value = 1; 
         }
 
@@ -416,8 +423,7 @@
 
         syncGanZhi(); 
         renderHistory();
-        applyZoom(); // 套用預設縮放
-        updateDisplay(); 
+        applyZoom(); 
     };
 
     function syncGanZhi() {
@@ -454,23 +460,23 @@
     }
 
     function manualSubmit() {
-        for(let i=0; i<6; i++) {
-            currentGua[i] = parseInt(document.getElementById(`yao-${i}`).value);
-        }
+        for(let i=0; i<6; i++) { currentGua[i] = parseInt(document.getElementById(`yao-${i}`).value); }
+        currentRecordId = Date.now(); // 產生全新紀錄 ID
+        document.getElementById("gua-notes").value = ""; // 清空舊筆記
         updateDisplay();
         saveToHistory();
     }
 
     function syncGuaToSelectors() {
-        for(let i=0; i<6; i++) {
-            document.getElementById(`yao-${i}`).value = currentGua[i];
-        }
+        for(let i=0; i<6; i++) { document.getElementById(`yao-${i}`).value = currentGua[i]; }
     }
     
     function autoRoll() { 
         currentGua = []; 
         for(let i=0; i<6; i++) currentGua.push(Math.floor(Math.random()*4)); 
         syncGuaToSelectors(); 
+        currentRecordId = Date.now(); // 產生全新紀錄 ID
+        document.getElementById("gua-notes").value = ""; // 清空舊筆記
         updateDisplay(); 
         saveToHistory();
     }
@@ -479,9 +485,7 @@
         showNayinState = !showNayinState;
         let btn = document.getElementById("btn-nayin");
         let elements = document.getElementsByClassName("nayin-box");
-        for(let el of elements) {
-            el.style.display = showNayinState ? "inline-block" : "none";
-        }
+        for(let el of elements) { el.style.display = showNayinState ? "inline-block" : "none"; }
         if(showNayinState) btn.classList.add("active"); else btn.classList.remove("active");
     }
 
@@ -489,64 +493,35 @@
         showFushenState = !showFushenState;
         let btn = document.getElementById("btn-fushen");
         let fCol = document.getElementById("fushen-col-id");
-        if(fCol) {
-            fCol.style.display = showFushenState ? "flex" : "none";
-        }
-        if(showFushenState) {
-            btn.classList.add("active");
-            btn.innerText = "隱藏 伏神";
-        } else {
-            btn.classList.remove("active");
-            btn.innerText = "顯示 伏神";
-        }
+        if(fCol) { fCol.style.display = showFushenState ? "flex" : "none"; }
+        if(showFushenState) { btn.classList.add("active"); btn.innerText = "隱藏 伏神"; } else { btn.classList.remove("active"); btn.innerText = "顯示 伏神"; }
     }
 
-    // 控制神煞顯示與隱藏
     function toggleShensha() {
         showShenshaState = !showShenshaState;
         let btn = document.getElementById("btn-shensha");
         let el = document.getElementById("shensha-line-id");
-        if(el) {
-            el.style.display = showShenshaState ? "block" : "none";
-        }
-        if(showShenshaState) {
-            btn.classList.add("active");
-            btn.innerText = "隱藏 神煞";
-        } else {
-            btn.classList.remove("active");
-            btn.innerText = "顯示 神煞";
-        }
+        if(el) { el.style.display = showShenshaState ? "block" : "none"; }
+        if(showShenshaState) { btn.classList.add("active"); btn.innerText = "隱藏 神煞"; } else { btn.classList.remove("active"); btn.innerText = "顯示 神煞"; }
     }
 
     function checkChongHe(zhisArr) {
         const chongPairs = [["子","午"], ["午","子"], ["丑","未"], ["未","丑"], ["寅","申"], ["申","寅"], ["卯","酉"], ["酉","卯"], ["辰","戌"], ["戌","辰"], ["巳","亥"], ["亥","巳"]];
         const hePairs = [["子","丑"], ["丑","子"], ["寅","亥"], ["亥","寅"], ["卯","戌"], ["戌","卯"], ["辰","酉"], ["酉","辰"], ["巳","申"], ["申","巳"], ["午","未"], ["未","午"]];
-        
-        let isChong = true;
-        let isHe = true;
-
+        let isChong = true; let isHe = true;
         for(let i=0; i<3; i++) {
-            let zhiLow = zhisArr[i];
-            let zhiUp = zhisArr[i+3];
-            
-            let matchChong = chongPairs.some(p => p[0]===zhiLow && p[1]===zhiUp);
-            if(!matchChong) isChong = false;
-
-            let matchHe = hePairs.some(p => p[0]===zhiLow && p[1]===zhiUp);
-            if(!matchHe) isHe = false;
+            let zhiLow = zhisArr[i]; let zhiUp = zhisArr[i+3];
+            let matchChong = chongPairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchChong) isChong = false;
+            let matchHe = hePairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchHe) isHe = false;
         }
-
         if(isChong) return " (六沖)";
         if(isHe) return " (六合)";
         return "";
     }
 
     function buildGuaDetails(guaArr) {
-        let lowStr = guaArr.slice(0,3).join("");
-        let upStr = guaArr.slice(3,6).join("");
-        let lowName = baguaCode[lowStr];
-        let upName = baguaCode[upStr];
-        
+        let lowStr = guaArr.slice(0,3).join(""); let upStr = guaArr.slice(3,6).join("");
+        let lowName = baguaCode[lowStr]; let upName = baguaCode[upStr];
         let shi = 1; let gong = lowName; 
         if (lowStr === upStr) { shi = 6; gong = lowName; } 
         else {
@@ -557,60 +532,28 @@
             else if(diff.length === 3) shi = 3;
             gong = upName; 
         }
-
         let gansOut = []; let zhisOut = [];
         let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
         for(let i=0; i<3; i++) { gansOut.push(lowData.gan[i]); zhisOut.push(lowData.zhi[i]); }
         for(let i=0; i<3; i++) { gansOut.push(upData.gan[i]); zhisOut.push(upData.zhi[i]); }
-
         let combinedKey = upName + lowName;
         let rawName = guaName64[combinedKey] || customGuaNames[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
-        
         let finalGong = bagongMap[rawName] || gong;
-        
         const pureGuaNames = ["乾為天","坤為地","震為雷","巽為風","坎為水","離為火","艮為山","兌為澤"];
-        if(pureGuaNames.includes(rawName)) {
-            shi = 6;
-        } else {
+        if(pureGuaNames.includes(rawName)) { shi = 6; } else {
             let pureArr = [];
             if(finalGong==="乾") pureArr=[1,1,1,1,1,1]; else if(finalGong==="坤") pureArr=[0,0,0,0,0,0];
             else if(finalGong==="震") pureArr=[1,0,0,1,0,0]; else if(finalGong==="巽") pureArr=[0,1,1,0,1,1];
             else if(finalGong==="坎") pureArr=[0,1,0,0,1,0]; else if(finalGong==="離") pureArr=[1,0,1,1,0,1];
             else if(finalGong==="艮") pureArr=[1,0,0,1,0,0]; else if(finalGong==="兌") pureArr=[0,1,1,0,1,1];
-            
-            let diffCount = 0;
-            let firstDiff = -1;
-            for(let i=0; i<6; i++) {
-                if(guaArr[i] !== pureArr[i]) {
-                    diffCount++;
-                    if(firstDiff === -1) firstDiff = i + 1;
-                }
-            }
-            if(diffCount === 1) shi = 1;
-            else if(diffCount === 2) shi = 2;
-            else if(diffCount === 3) shi = 3;
-            else if(diffCount === 4) shi = 4;
-            else if(diffCount === 5) shi = 5;
-            
-            if(rawName.includes("晉") || rawName.includes("需") || rawName.includes("訟") || rawName.includes("明夷") || rawName.includes("大過") || rawName.includes("隨") || rawName.includes("漸") || rawName.includes("小過")) {
-                shi = 4; 
-            }
-            if(rawName.includes("大有") || rawName.includes("比") || rawName.includes("同人") || rawName.includes("師") || rawName.includes("恆") || rawName.includes("歸妹") || rawName.includes("蠱") || rawName.includes("頤")) {
-                shi = 3; 
-            }
+            let diffCount = 0; let firstDiff = -1;
+            for(let i=0; i<6; i++) { if(guaArr[i] !== pureArr[i]) { diffCount++; if(firstDiff === -1) firstDiff = i + 1; } }
+            if(diffCount === 1) shi = 1; else if(diffCount === 2) shi = 2; else if(diffCount === 3) shi = 3; else if(diffCount === 4) shi = 4; else if(diffCount === 5) shi = 5;
+            if(rawName.includes("晉") || rawName.includes("需") || rawName.includes("訟") || rawName.includes("明夷") || rawName.includes("大過") || rawName.includes("隨") || rawName.includes("漸") || rawName.includes("小過")) { shi = 4; }
+            if(rawName.includes("大有") || rawName.includes("比") || rawName.includes("同人") || rawName.includes("師") || rawName.includes("恆") || rawName.includes("歸妹") || rawName.includes("蠱") || rawName.includes("頤")) { shi = 3; }
         }
-
         let chongHeSuffix = checkChongHe(zhisOut);
-
-        return { 
-            name: rawName, 
-            gong: finalGong, 
-            shi: shi, 
-            gans: gansOut, 
-            zhis: zhisOut, 
-            wuxing: naJiaBase[finalGong].wuxing,
-            chongHe: chongHeSuffix
-        };
+        return { name: rawName, gong: finalGong, shi: shi, gans: gansOut, zhis: zhisOut, wuxing: naJiaBase[finalGong].wuxing, chongHe: chongHeSuffix };
     }
 
     function getLiuQin(gongWX, yaoZhi) {
@@ -648,33 +591,21 @@
     }
 
     function calculateFushen(mainInfo) {
-        let gongName = mainInfo.gong; 
-        let gongWX = mainInfo.wuxing;
-
+        let gongName = mainInfo.gong; let gongWX = mainInfo.wuxing;
         let pureArr = [];
         if(gongName==="乾") pureArr=[1,1,1,1,1,1]; else if(gongName==="坤") pureArr=[0,0,0,0,0,0];
         else if(gongName==="震") pureArr=[1,0,0,1,0,0]; else if(gongName==="巽") pureArr=[0,1,1,0,1,1];
         else if(gongName==="坎") pureArr=[0,1,0,0,1,0]; else if(gongName==="離") pureArr=[1,0,1,1,0,1];
         else if(gongName==="艮") pureArr=[1,0,0,1,0,0]; else if(gongName==="兌") pureArr=[0,1,1,0,1,1];
-
-        let lowName = baguaCode[pureArr.slice(0,3).join("")];
-        let upName = baguaCode[pureArr.slice(3,6).join("")];
+        let lowName = baguaCode[pureArr.slice(0,3).join("")]; let upName = baguaCode[pureArr.slice(3,6).join("")];
         let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
-
-        let pureGans = [...lowData.gan, ...upData.gan];
-        let pureZhis = [...lowData.zhi, ...upData.zhi];
-
+        let pureGans = [...lowData.gan, ...upData.gan]; let pureZhis = [...lowData.zhi, ...upData.zhi];
         let mainLiuqins = [];
-        for(let i=0; i<6; i++) {
-            mainLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i]));
-        }
-
+        for(let i=0; i<6; i++) { mainLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i])); }
         let fushenList = ["", "", "", "", "", ""];
         for(let i=0; i<6; i++) {
             let pureLQ = getLiuQin(gongWX, pureZhis[i]);
-            if (!mainLiuqins.includes(pureLQ)) {
-                fushenList[i] = `${pureLQ}${pureGans[i]}${pureZhis[i]}${wuxing[pureZhis[i]]}`;
-            }
+            if (!mainLiuqins.includes(pureLQ)) { fushenList[i] = `${pureLQ}${pureGans[i]}${pureZhis[i]}${wuxing[pureZhis[i]]}`; }
         }
         return fushenList;
     }
@@ -718,7 +649,6 @@
         htm += `  <div class="meta-line"><b>西元時間：</b>${year} 年 ${month} 月 ${date} 日 ${hourVal} 時 ${minVal} 分</div>`;
         htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGZ}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
         
-        // 核心修改：神煞改用動態式隱藏/顯示
         let ssDisplay = showShenshaState ? "block" : "none";
         htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};"><b>精算神煞：</b>`;
         htm += `貴人-${sha["貴人"]} &nbsp;祿神-${sha["日祿"]} &nbsp;羊刃-${sha["羊刃"]} &nbsp;文昌-${sha["文昌"]} &nbsp;驛馬-${sha["驛馬"]} &nbsp;桃花-${sha["桃花"]} &nbsp;將星-${sha["將星"]} &nbsp;華蓋-${sha["華蓋"]}<br>`;
@@ -727,19 +657,13 @@
         htm += `</div>`;
 
         htm += `<div class="paipan-grid">`;
-        
         htm += `  <div class="liushen-col">`;
-        for(let i=5; i>=0; i--) {
-            htm += `    <div class="yao-row">${liuShouArr[(liuShouOrder + i) % 6]}</div>`;
-        }
+        for(let i=5; i>=0; i--) { htm += `    <div class="yao-row">${liuShouArr[(liuShouOrder + i) % 6]}</div>`; }
         htm += `  </div>`;
 
         let fDisplay = showFushenState ? "flex" : "none";
         htm += `  <div class="fushen-col" id="fushen-col-id" style="display:${fDisplay};">`;
-        for(let i=5; i>=0; i--) {
-            let fsText = fushenData[i] ? fushenData[i] : "&nbsp;"; 
-            htm += `    <div class="yao-row">${fsText}</div>`;
-        }
+        for(let i=5; i>=0; i--) { let fsText = fushenData[i] ? fushenData[i] : "&nbsp;"; htm += `    <div class="yao-row">${fsText}</div>`; }
         htm += `  </div>`;
 
         htm += `  <div class="gua-col">`;
@@ -752,6 +676,7 @@
             let yaoNum = currentGua[i];
             htm += `    <div class="yao-row">`;
 
+            // 本卦
             htm += `      <div class="yao-part">`;
             let mZhi = mainInfo.zhis[i];
             let mLiuQin = getLiuQin(mainInfo.wuxing, mZhi);
@@ -765,6 +690,7 @@
             htm += `        <span class="shi-ying">${mShiYing}</span>`;
             htm += `      </div>`;
 
+            // 變卦
             htm += `      <div class="yao-part change-part">`;
             let cMark = (yaoNum === 3) ? "╳➔" : ((yaoNum === 0) ? "○➔" : "  ");
             let cZhi = changeInfo.zhis[i];
@@ -795,85 +721,104 @@
         if(showShenshaState) document.getElementById("btn-shensha").classList.add("active");
     }
 
+    // 儲存至LocalStorage（包含筆記欄位）
     function saveToHistory() {
         let memo = document.getElementById("memo").value || "未命名占卜";
         let dateStr = `${document.getElementById("year").value}/${document.getElementById("month").value}/${document.getElementById("date").value}`;
-        
-        let record = {
-            id: Date.now(),
-            memo: memo,
-            date: dateStr,
-            hour: document.getElementById("hour").value,
-            minute: document.getElementById("minute").value, 
-            dayGan: document.getElementById("day-gan").value,
-            dayZhi: document.getElementById("day-zhi").value,
-            monthZhi: document.getElementById("month-zhi").value,
-            gua: [...currentGua]
-        };
+        let notes = document.getElementById("gua-notes").value;
 
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        if (history.length > 0 && history[0].memo === memo && history[0].gua.toString() === currentGua.toString()) {
-            return; 
+        
+        // 檢查是否是已存在的紀錄在進行編輯
+        let existingIndex = history.findIndex(x => x.id === currentRecordId);
+
+        let record = {
+            id: currentRecordId || Date.now(), 
+            memo: memo, date: dateStr,
+            hour: document.getElementById("hour").value, minute: document.getElementById("minute").value, 
+            dayGan: document.getElementById("day-gan").value, dayZhi: document.getElementById("day-zhi").value,
+            monthZhi: document.getElementById("month-zhi").value, gua: [...currentGua],
+            notes: notes
+        };
+
+        if (existingIndex !== -1) {
+            history[existingIndex] = record; // 更新現有紀錄
+        } else {
+            currentRecordId = record.id; // 鎖定當前 ID
+            // 防止重複按鈕點擊產生一模一樣的冗餘空白紀錄
+            if (history.length > 0 && history[0].memo === memo && history[0].gua.toString() === currentGua.toString() && !notes) { return; }
+            history.unshift(record);
         }
-        history.unshift(record);
-        localStorage.setItem("sixyao_history", JSON.stringify(history));
+
+        localStorage.setItem("sixyao_history", JSON.stringify(history)); 
         renderHistory();
+    }
+
+    // 當打字輸入筆記時，即時自動儲存
+    function autoSaveNotes() {
+        if (!currentRecordId) {
+            currentRecordId = Date.now(); // 如果是全新排盤還沒入庫，給它一個識別碼
+        }
+        saveToHistory();
+        
+        let statusSpan = document.getElementById("save-status");
+        statusSpan.innerText = "已自動儲存筆記...";
+        setTimeout(() => { statusSpan.innerText = ""; }, 1500);
     }
 
     function renderHistory() {
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
         let container = document.getElementById("history-container");
-        
-        if(history.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#666; padding:10px; font-size:12px;">暫無占卦紀錄</div>`;
-            return;
-        }
-
+        if(history.length === 0) { container.innerHTML = `<div style="text-align:center; color:#666; padding:10px; font-size:12px;">暫無占卦紀錄</div>`; return; }
         container.innerHTML = history.map(item => `
             <div class="history-item">
                 <div class="history-info" onclick="loadHistory(${item.id})">
                     <span style="color:#ff9800; font-weight:bold;">● [${item.date}]</span> 
                     <span style="color:#fff; margin-left:5px;">${item.memo}</span>
+                    ${item.notes ? '<span style="color:#10b981; font-size:11px; margin-left:8px;">[有筆記]</span>' : ''}
                 </div>
-                <button style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px;" onclick="deleteHistory(${item.id})">刪除</button>
+                <button style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px;" onclick="deleteHistory(${item.id}, event)">刪除</button>
             </div>
         `).join("");
     }
 
+    // 回溯歷史紀錄（還原卦象、基本資料與筆記文字欄）
     function loadHistory(id) {
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        let item = history.find(x => x.id === id);
-        if(!item) return;
-
+        let item = history.find(x => x.id === id); if(!item) return;
+        
+        currentRecordId = item.id; // 綁定當前追蹤的歷史識別碼
         document.getElementById("memo").value = item.memo;
         let parts = item.date.split("/");
-        document.getElementById("year").value = parts[0];
-        document.getElementById("month").value = parts[1];
-        document.getElementById("date").value = parts[2];
-        document.getElementById("hour").value = item.hour;
-        if(item.minute) document.getElementById("minute").value = item.minute; 
-
-        document.getElementById("day-gan").value = item.dayGan;
-        document.getElementById("day-zhi").value = item.dayZhi;
-        document.getElementById("month-zhi").value = item.monthZhi;
-
-        currentGua = [...item.gua];
+        document.getElementById("year").value = parts[0]; document.getElementById("month").value = parts[1]; document.getElementById("date").value = parts[2];
+        document.getElementById("hour").value = item.hour; if(item.minute) document.getElementById("minute").value = item.minute; 
+        document.getElementById("day-gan").value = item.dayGan; document.getElementById("day-zhi").value = item.dayZhi; document.getElementById("month-zhi").value = item.monthZhi;
+        
+        currentGua = [...item.gua]; 
         syncGuaToSelectors(); 
+        
+        // 還原歷史筆記欄文字（若無則清空）
+        document.getElementById("gua-notes").value = item.notes || "";
+        
         updateDisplay();
     }
 
-    function deleteHistory(id) {
+    function deleteHistory(id, event) {
+        if(event) event.stopPropagation(); // 防止觸發外層的點擊讀取
         let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        history = history.filter(x => x.id !== id);
-        localStorage.setItem("sixyao_history", JSON.stringify(history));
+        history = history.filter(x => x.id !== id); 
+        localStorage.setItem("sixyao_history", JSON.stringify(history)); 
+        if(currentRecordId === id) { currentRecordId = null; } // 若刪除的是當前檢視卦，清除追蹤
         renderHistory();
     }
 
-    function clearHistory() {
-        if(confirm("確定要清空所有占卦歷史紀錄嗎？此動作無法復原。")) {
-            localStorage.clear();
-            renderHistory();
-        }
+    function clearHistory() { 
+        if(confirm("確定要清空所有占卦歷史紀錄嗎？")) { 
+            localStorage.clear(); 
+            currentRecordId = null;
+            document.getElementById("gua-notes").value = "";
+            renderHistory(); 
+        } 
     }
 </script>
 </body>
