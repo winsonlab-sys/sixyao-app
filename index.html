@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.8 (完工精簡版)</title>
+    <title>專業六爻排盤系統 V6.9 (完工精簡版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -349,6 +349,7 @@
     const baguaCode = {"111":"乾", "000":"坤", "100":"震", "011":"巽", "010":"坎", "101":"離", "001":"艮", "110":"兌"};
     const baguaMing = {"乾":"天", "坤":"地", "震":"雷", "巽":"風", "坎":"水", "離":"火", "艮":"山", "兌":"澤"};
 
+    // 核心修正 1：將「澤天嬖」精準修正為「澤天夬」
     const guaName64 = {
         "乾乾":"乾為天", "坤坤":"坤為地", "坎坎":"坎為水", "離離":"離為火", "震震":"震為雷", "巽巽":"巽為風", "艮艮":"艮為山", "兌兌":"兌為澤",
         "坎乾":"水天需", "乾坎":"天水訟", "坤坎":"地水師", "坎坤":"水地比", "巽乾":"風天小畜", "乾兌":"天澤履", "坤乾":"地天泰", "乾坤":"天地否",
@@ -356,10 +357,11 @@
         "離震":"火雷噬嗑", "艮離":"山火賁", "艮坤":"山地剝", "坤震":"地雷復", "乾震":"天雷無妄", "艮乾":"山天大畜", "艮震":"山雷頤", "兌巽":"澤風大過",
         "坎艮":"水山蹇", "震坎":"雷水解", "艮兌":"山澤損", "震乾":"雷天大壯", "離坤":"火地晉", "坤離":"地火明夷", "巽離":"風火家人", "離兌":"火澤睽",
         "坎兌":"水澤節", "巽兌":"風澤中孚", "震艮":"雷山小過", "坎離":"水火既濟", "離坎":"火水未濟", "乾巽":"天風姤", "兌坤":"澤地萃", "坤巽":"地風升",
-        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天嬖", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
+        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天夬", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
+    // 核心修正 1：將分宮中的「澤天嬖」精準修正為「澤天夬」
     const bagongMap = {
         "乾為天":"乾", "天風姤":"乾", "天山遁":"乾", "天地否":"乾", "風地觀":"乾", "山地剝":"乾", "火地晉":"乾", "火天大有":"乾",
         "兌為澤":"兌", "澤水困":"兌", "澤地萃":"兌", "澤山咸":"兌", "水山蹇":"兌", "地山謙":"兌", "雷山小過":"兌", "雷澤歸妹":"兌",
@@ -368,7 +370,7 @@
         "巽為風":"巽", "風天小畜":"巽", "風火家人":"巽", "風雷益":"巽", "天雷無妄":"巽", "火雷噬嗑":"巽", "山雷頤":"巽", "山風蠱":"巽",
         "坎為水":"坎", "水澤節":"坎", "水雷屯":"坎", "水火既濟":"坎", "澤火革":"坎", "雷火豐":"坎", "地火明夷":"坎", "地水師":"坎",
         "艮為山":"艮", "山火賁":"艮", "山天大畜":"艮", "山澤損":"艮", "火澤睽":"艮", "天澤履":"艮", "風澤中孚":"艮", "風山漸":"艮",
-        "坤為地":"坤", "地雷復":"坤", "地澤臨":"坤", "地天泰":"坤", "雷天大壯":"坤", "澤天嬖":"坤", "水天需":"坤", "水地比":"坤"
+        "坤為地":"坤", "地雷復":"坤", "地澤臨":"坤", "地天泰":"坤", "雷天大壯":"坤", "澤天夬":"乾", "水天需":"坤", "水地比":"坤"
     };
 
     const customGuaNames = {
@@ -545,7 +547,7 @@
             else if(finalGong==="艮") pureArr=[1,0,0,1,0,0]; else if(finalGong==="兌") pureArr=[0,1,1,0,1,1];
             let diffCount = 0; let firstDiff = -1;
             for(let i=0; i<6; i++) { if(guaArr[i] !== pureArr[i]) { diffCount++; if(firstDiff === -1) firstDiff = i + 1; } }
-            if(diffCount === 1) shi = 1; else if(diffCount === 2) shi = 2; else if(diffCount === 3) shi = 3; else if(diffCount === 4) shi = 4; else if(diffCount === 5) shi = 5;
+            if(diffCount === 1) shi = 1; else if(diffCount === 2) shi = 2; else if(diffCount === 3) shi = 3; else if(diffCount === 4) slab = 4; else if(diffCount === 5) shi = 5;
             if(rawName.includes("晉") || rawName.includes("需") || rawName.includes("訟") || rawName.includes("明夷") || rawName.includes("大過") || rawName.includes("隨") || rawName.includes("漸") || rawName.includes("小過")) { shi = 4; }
             if(rawName.includes("大有") || rawName.includes("比") || rawName.includes("同人") || rawName.includes("師") || rawName.includes("恆") || rawName.includes("歸妹") || rawName.includes("蠱") || rawName.includes("頤")) { shi = 3; }
         }
@@ -627,6 +629,9 @@
     function updateDisplay() {
         if (currentGua.length < 6) return;
 
+        // 核心修正 2：判定是否為靜卦（六爻皆無 0 或 3 變動）
+        let isQuietGua = !currentGua.some(y => y === 0 || y === 3);
+
         let memo = document.getElementById("memo").value || "未填寫";
         let year = parseInt(document.getElementById("year").value);
         let month = parseInt(document.getElementById("month").value);
@@ -688,7 +693,10 @@
         htm += `  <div class="gua-col">`;
         htm += `    <div class="gua-header">`;
         htm += `      <div class="gua-title">本卦 ${mainInfo.gong}宮：${mainInfo.name}${mainInfo.chongHe}</div>`;
-        htm += `      <div class="gua-title change-title">變卦 ${changeInfo.gong}宮：${changeInfo.name}${changeInfo.chongHe}</div>`;
+        // 核心修正 2：如果是靜卦，變卦標題隱藏
+        if(!isQuietGua) {
+            htm += `      <div class="gua-title change-title">變卦 ${changeInfo.gong}宮：${changeInfo.name}${changeInfo.chongHe}</div>`;
+        }
         htm += `    </div>`;
 
         for(let i = 5; i >= 0; i--) {
@@ -709,21 +717,23 @@
             htm += `        <span class="shi-ying">${mShiYing}</span>`;
             htm += `      </div>`;
 
-            // 變卦（核心修正：3 老陽變陰改為 ○➔，0 老陰變陽改為 ╳➔）
-            htm += `      <div class="yao-part change-part">`;
-            let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
-            let cZhi = changeInfo.zhis[i];
-            let cLiuQin = getLiuQin(changeInfo.wuxing, cZhi);
-            let cWX = wuxing[cZhi];
-            let cShiYing = (changeInfo.shi === (i+1)) ? "世" : (((changeInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
-            let cNY = nayinMap[changeInfo.gans[i] + cZhi] || "";
+            // 變卦（核心修正 2：如果是靜卦，變卦爻象整欄不用顯示）
+            if(!isQuietGua) {
+                htm += `      <div class="yao-part change-part">`;
+                let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
+                let cZhi = changeInfo.zhis[i];
+                let cLiuQin = getLiuQin(changeInfo.wuxing, cZhi);
+                let cWX = wuxing[cZhi];
+                let cShiYing = (changeInfo.shi === (i+1)) ? "世" : (((changeInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
+                let cNY = nayinMap[changeInfo.gans[i] + cZhi] || "";
 
-            htm += `        <span class="dong-mark">${cMark}</span>`;
-            htm += `        <span class="liuqin-zhi">${cLiuQin}${cZhi}${cWX}</span>`;
-            htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${cNY}]</span>`;
-            htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(changeGuaArr[i]===1)?'yang':'yin'}"></span></span>`;
-            htm += `        <span class="shi-ying">${cShiYing}</span>`;
-            htm += `      </div>`;
+                htm += `        <span class="dong-mark">${cMark}</span>`;
+                htm += `        <span class="liuqin-zhi">${cLiuQin}${cZhi}${cWX}</span>`;
+                htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${cNY}]</span>`;
+                htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(changeGuaArr[i]===1)?'yang':'yin'}"></span></span>`;
+                htm += `        <span class="shi-ying">${cShiYing}</span>`;
+                htm += `      </div>`;
+            }
 
             htm += `    </div>`; 
         }
