@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V6.9 (完工精簡版)</title>
+    <title>專業六爻排盤系統 V7.0 (六親邏輯修正版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -349,7 +349,6 @@
     const baguaCode = {"111":"乾", "000":"坤", "100":"震", "011":"巽", "010":"坎", "101":"離", "001":"艮", "110":"兌"};
     const baguaMing = {"乾":"天", "坤":"地", "震":"雷", "巽":"風", "坎":"水", "離":"火", "艮":"山", "兌":"澤"};
 
-    // 核心修正 1：將「澤天嬖」精準修正為「澤天夬」
     const guaName64 = {
         "乾乾":"乾為天", "坤坤":"坤為地", "坎坎":"坎為水", "離離":"離為火", "震震":"震為雷", "巽巽":"巽為風", "艮艮":"艮為山", "兌兌":"兌為澤",
         "坎乾":"水天需", "乾坎":"天水訟", "坤坎":"地水師", "坎坤":"水地比", "巽乾":"風天小畜", "乾兌":"天澤履", "坤乾":"地天泰", "乾坤":"天地否",
@@ -361,7 +360,6 @@
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
-    // 核心修正 1：將分宮中的「澤天嬖」精準修正為「澤天夬」
     const bagongMap = {
         "乾為天":"乾", "天風姤":"乾", "天山遁":"乾", "天地否":"乾", "風地觀":"乾", "山地剝":"乾", "火地晉":"乾", "火天大有":"乾",
         "兌為澤":"兌", "澤水困":"兌", "澤地萃":"兌", "澤山咸":"兌", "水山蹇":"兌", "地山謙":"兌", "雷山小過":"兌", "雷澤歸妹":"兌",
@@ -629,7 +627,6 @@
     function updateDisplay() {
         if (currentGua.length < 6) return;
 
-        // 核心修正 2：判定是否為靜卦（六爻皆無 0 或 3 變動）
         let isQuietGua = !currentGua.some(y => y === 0 || y === 3);
 
         let memo = document.getElementById("memo").value || "未填寫";
@@ -693,7 +690,6 @@
         htm += `  <div class="gua-col">`;
         htm += `    <div class="gua-header">`;
         htm += `      <div class="gua-title">本卦 ${mainInfo.gong}宮：${mainInfo.name}${mainInfo.chongHe}</div>`;
-        // 核心修正 2：如果是靜卦，變卦標題隱藏
         if(!isQuietGua) {
             htm += `      <div class="gua-title change-title">變卦 ${changeInfo.gong}宮：${changeInfo.name}${changeInfo.chongHe}</div>`;
         }
@@ -717,12 +713,15 @@
             htm += `        <span class="shi-ying">${mShiYing}</span>`;
             htm += `      </div>`;
 
-            // 變卦（核心修正 2：如果是靜卦，變卦爻象整欄不用顯示）
+            // 變卦
             if(!isQuietGua) {
                 htm += `      <div class="yao-part change-part">`;
                 let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
                 let cZhi = changeInfo.zhis[i];
-                let cLiuQin = getLiuQin(changeInfo.wuxing, cZhi);
+                
+                // ➔ 【核心重大修正點】：變卦六親必須以「本卦的五行(mainInfo.wuxing)」為基礎進行排盤
+                let cLiuQin = getLiuQin(mainInfo.wuxing, cZhi);
+                
                 let cWX = wuxing[cZhi];
                 let cShiYing = (changeInfo.shi === (i+1)) ? "世" : (((changeInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
                 let cNY = nayinMap[changeInfo.gans[i] + cZhi] || "";
