@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V7.0 (六親邏輯修正版)</title>
+    <title>專業六爻排盤系統 V7.1 (世應與遊歸魂修正版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -147,8 +147,8 @@
             margin-bottom: 8px; 
             color: #0f172a; 
         }
-        .gua-title { width: 200px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
-        .gua-title.change-title { width: 240px; padding-left: 20px; }
+        .gua-title { width: 220px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
+        .gua-title.change-title { width: 260px; padding-left: 20px; }
 
         .yao-row { display: flex; align-items: center; height: 32px; }
         
@@ -360,21 +360,25 @@
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
-    const bagongMap = {
-        "乾為天":"乾", "天風姤":"乾", "天山遁":"乾", "天地否":"乾", "風地觀":"乾", "山地剝":"乾", "火地晉":"乾", "火天大有":"乾",
-        "兌為澤":"兌", "澤水困":"兌", "澤地萃":"兌", "澤山咸":"兌", "水山蹇":"兌", "地山謙":"兌", "雷山小過":"兌", "雷澤歸妹":"兌",
-        "離為火":"離", "火山旅":"離", "火風鼎":"離", "火水未濟":"離", "山水蒙":"離", "風水渙":"離", "天水訟":"離", "天火同人":"離",
-        "震為雷":"震", "雷地豫":"震", "雷水解":"震", "雷風恆":"震", "地風升":"震", "水風井":"震", "澤風大過":"震", "澤雷隨":"震",
-        "巽為風":"巽", "風天小畜":"巽", "風火家人":"巽", "風雷益":"巽", "天雷無妄":"巽", "火雷噬嗑":"巽", "山雷頤":"巽", "山風蠱":"巽",
-        "坎為水":"坎", "水澤節":"坎", "水雷屯":"坎", "水火既濟":"坎", "澤火革":"坎", "雷火豐":"坎", "地火明夷":"坎", "地水師":"坎",
-        "艮為山":"艮", "山火賁":"艮", "山天大畜":"艮", "山澤損":"艮", "火澤睽":"艮", "天澤履":"艮", "風澤中孚":"艮", "風山漸":"艮",
-        "坤為地":"坤", "地雷復":"坤", "地澤臨":"坤", "地天泰":"坤", "雷天大壯":"坤", "澤天夬":"乾", "水天需":"坤", "水地比":"坤"
-    };
-
     const customGuaNames = {
         "巽艮":"風山漸", "離艮":"火山旅", "艮坎":"山水蒙", "巽坎":"風水渙", "震坎":"雷水解", 
         "水震":"水雷屯", "雷離":"雷火豐", "坤震":"地雷復"
     };
+
+    // ➔ 【核心重大修正點】：建立精準的京房易八宮全對照表，完美搞定「世應位置」與「遊魂歸魂」
+    const jingFangEightGongs = {
+        "乾": ["乾為天", "天風姤", "天山遁", "天地否", "風地觀", "山地剝", "火地晉", "火天大有"],
+        "兌": ["兌為澤", "澤水困", "澤地萃", "澤山咸", "水山蹇", "地山謙", "雷山小過", "雷澤歸妹"],
+        "離": ["離為火", "火山旅", "火風鼎", "火水未濟", "山水蒙", "風水渙", "天水訟", "天火同人"],
+        "震": ["震為雷", "雷地豫", "雷水解", "雷風恆", "地風升", "水風井", "澤風大過", "澤雷隨"],
+        "巽": ["巽為風", "風天小畜", "風火家人", "風雷益", "天雷無妄", "火雷噬嗑", "山雷頤", "山風蠱"],
+        "坎": ["坎為水", "水澤節", "水雷屯", "水火既濟", "澤火革", "雷火豐", "地火明夷", "地水師"],
+        "艮": ["艮為山", "山火賁", "山天大畜", "山澤損", "火澤睽", "天澤履", "風澤中孚", "風山漸"],
+        "坤": ["坤為地", "地雷復", "地澤臨", "地天泰", "雷天大壯", "澤天夬", "水天需", "水地比"]
+    };
+
+    // 依據卦在八宮中的順序，精確回傳世爻位置 (1~6) 以及遊歸魂標記
+    const gongIndexToShiYao = [6, 1, 2, 3, 4, 5, 4, 3]; // 0=本宮(6世), 1=一世, 2=二世, 3=三世, 4=四世, 5=五世, 6=遊魂(4世), 7=歸魂(3世)
 
     const yaoOptions = [
         { value: 1, text: "少陽 ( — )" },
@@ -516,41 +520,45 @@
         return "";
     }
 
+    function findGuaGongAndIndex(rawName) {
+        for (let gong in jingFangEightGongs) {
+            let idx = jingFangEightGongs[gong].indexOf(rawName);
+            if (idx !== -1) {
+                return { gong: gong, index: idx };
+            }
+        }
+        return { gong: "乾", index: 0 }; 
+    }
+
     function buildGuaDetails(guaArr) {
         let lowStr = guaArr.slice(0,3).join(""); let upStr = guaArr.slice(3,6).join("");
         let lowName = baguaCode[lowStr]; let upName = baguaCode[upStr];
-        let shi = 1; let gong = lowName; 
-        if (lowStr === upStr) { shi = 6; gong = lowName; } 
-        else {
-            let diff = [];
-            for(let i=0; i<3; i++) if(guaArr[i] !== guaArr[i+3]) diff.push(i+1);
-            if(diff.length === 1) shi = diff[0];
-            else if(diff.length === 2) { shi = (diff.includes(1)&&diff.includes(2))? 4 : 5; }
-            else if(diff.length === 3) shi = 3;
-            gong = upName; 
-        }
+        
+        let combinedKey = upName + lowName;
+        let rawName = guaName64[combinedKey] || customGuaNames[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
+        
+        // ➔ 【全新世應演算法】：完全查表對照京房八宮，精準無誤
+        let findRes = findGuaGongAndIndex(rawName);
+        let finalGong = findRes.gong;
+        let gongIdx = findRes.index;
+        let shi = gongIndexToShiYao[gongIdx];
+
+        // 判定遊魂與歸魂
+        let youGuiSuffix = "";
+        if (gongIdx === 6) youGuiSuffix = " (遊魂)";
+        if (gongIdx === 7) youGuiSuffix = " (歸魂)";
+
         let gansOut = []; let zhisOut = [];
         let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
         for(let i=0; i<3; i++) { gansOut.push(lowData.gan[i]); zhisOut.push(lowData.zhi[i]); }
         for(let i=0; i<3; i++) { gansOut.push(upData.gan[i]); zhisOut.push(upData.zhi[i]); }
-        let combinedKey = upName + lowName;
-        let rawName = guaName64[combinedKey] || customGuaNames[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
-        let finalGong = bagongMap[rawName] || gong;
-        const pureGuaNames = ["乾為天","坤為地","震為雷","巽為風","坎為水","離為火","艮為山","兌為澤"];
-        if(pureGuaNames.includes(rawName)) { shi = 6; } else {
-            let pureArr = [];
-            if(finalGong==="乾") pureArr=[1,1,1,1,1,1]; else if(finalGong==="坤") pureArr=[0,0,0,0,0,0];
-            else if(finalGong==="震") pureArr=[1,0,0,1,0,0]; else if(finalGong==="巽") pureArr=[0,1,1,0,1,1];
-            else if(finalGong==="坎") pureArr=[0,1,0,0,1,0]; else if(finalGong==="離") pureArr=[1,0,1,1,0,1];
-            else if(finalGong==="艮") pureArr=[1,0,0,1,0,0]; else if(finalGong==="兌") pureArr=[0,1,1,0,1,1];
-            let diffCount = 0; let firstDiff = -1;
-            for(let i=0; i<6; i++) { if(guaArr[i] !== pureArr[i]) { diffCount++; if(firstDiff === -1) firstDiff = i + 1; } }
-            if(diffCount === 1) shi = 1; else if(diffCount === 2) shi = 2; else if(diffCount === 3) shi = 3; else if(diffCount === 4) slab = 4; else if(diffCount === 5) shi = 5;
-            if(rawName.includes("晉") || rawName.includes("需") || rawName.includes("訟") || rawName.includes("明夷") || rawName.includes("大過") || rawName.includes("隨") || rawName.includes("漸") || rawName.includes("小過")) { shi = 4; }
-            if(rawName.includes("大有") || rawName.includes("比") || rawName.includes("同人") || rawName.includes("師") || rawName.includes("恆") || rawName.includes("歸妹") || rawName.includes("蠱") || rawName.includes("頤")) { shi = 3; }
-        }
+        
         let chongHeSuffix = checkChongHe(zhisOut);
-        return { name: rawName, gong: finalGong, shi: shi, gans: gansOut, zhis: zhisOut, wuxing: naJiaBase[finalGong].wuxing, chongHe: chongHeSuffix };
+        
+        // 結合六沖六合與遊魂歸魂的後綴
+        let fullSuffix = chongHeSuffix + youGuiSuffix;
+
+        return { name: rawName, gong: finalGong, shi: shi, gans: gansOut, zhis: zhisOut, wuxing: naJiaBase[finalGong].wuxing, chongHe: fullSuffix };
     }
 
     function getLiuQin(gongWX, yaoZhi) {
@@ -666,7 +674,8 @@
         htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGZ}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
         
         let ssDisplay = showShenshaState ? "block" : "none";
-        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};"><b>精算神煞：</b>`;
+        // ➔ 【優化修正點】：將「精算神煞」修正為「神煞」
+        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};"><b>神煞：</b>`;
         htm += `貴人-${sha["貴人"]} &nbsp;祿神-${sha["日祿"]} &nbsp;羊刃-${sha["羊刃"]} &nbsp;文昌-${sha["文昌"]} &nbsp;驛馬-${sha["驛馬"]} &nbsp;桃花-${sha["桃花"]} &nbsp;將星-${sha["將星"]} &nbsp;華蓋-${sha["華蓋"]}<br>`;
         htm += `災煞-${sha["災煞"]} &nbsp;劫煞-${sha["劫煞"]} &nbsp;謀星-${sha["謀星"]} &nbsp;天醫-${sha["天醫"]} &nbsp;天喜-${sha["天喜"]}`;
         htm += `  </div>`;
@@ -719,7 +728,6 @@
                 let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
                 let cZhi = changeInfo.zhis[i];
                 
-                // ➔ 【核心重大修正點】：變卦六親必須以「本卦的五行(mainInfo.wuxing)」為基礎進行排盤
                 let cLiuQin = getLiuQin(mainInfo.wuxing, cZhi);
                 
                 let cWX = wuxing[cZhi];
