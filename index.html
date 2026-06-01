@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V7.1 (世應與遊歸魂修正版)</title>
+    <title>專業六爻排盤系統 V7.7 (全爻同色與神煞優化版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -99,14 +99,34 @@
         .highlight-red { color: #dc2626; }
         .highlight-blue { color: #2563eb; }
         
+        /* 神煞緊湊排版 */
         .shensha-line {
             display: none;
-            margin-top: 4px; 
+            margin-top: 6px; 
             font-weight: normal; 
-            color: #475569;
+            color: #334155;
             background-color: #f1f5f9;
-            padding: 6px;
+            padding: 6px 10px;
             border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+        .shensha-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px 6px;
+            align-items: center;
+            font-size: 13px;
+        }
+        .shensha-title {
+            font-weight: bold;
+            color: #0f172a;
+            margin-right: 2px;
+        }
+        .shensha-item {
+            background-color: #e2e8f0;
+            padding: 1px 5px;
+            border-radius: 3px;
+            white-space: nowrap;
         }
         
         .paipan-grid { 
@@ -125,12 +145,27 @@
         }
         
         .fushen-col {
-            width: 95px;
+            width: 105px;
             display: none; 
             flex-direction: column;
             padding-top: 32px;
             border-right: 1px dashed #cbd5e1;
             margin-right: 10px;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+        }
+        .fushen-star {
+            color: #228B22; 
+            font-weight: bold;
+            margin-right: 2px; 
+        }
+        .hidden-yao-highlight {
+            color: #228B22; 
+            font-weight: bold;
+        }
+        .hidden-yao-normal {
+            color: #64748b; 
+            font-weight: normal;
         }
         
         .gua-col { 
@@ -147,13 +182,15 @@
             margin-bottom: 8px; 
             color: #0f172a; 
         }
-        .gua-title { width: 220px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
-        .gua-title.change-title { width: 260px; padding-left: 20px; }
+        /* 本卦與變卦標題同步為藍色 */
+        .gua-title { width: 240px; text-align: left; font-size: 14px; color: #0284c7; font-weight: 800; padding-left: 5px; }
+        .gua-title.change-title { width: 250px; padding-left: 20px; color: #0284c7; }
 
         .yao-row { display: flex; align-items: center; height: 32px; }
         
-        .yao-part { width: 200px; display: flex; align-items: center; position: relative; margin-right: 15px; }
-        .yao-part.change-part { width: 240px; margin-right: 0; } 
+        /* 本卦與變卦字體顏色等同處理，不淡化 */
+        .yao-part { width: 210px; display: flex; align-items: center; position: relative; margin-right: 15px; color: #1e293b; }
+        .yao-part.change-part { width: 240px; margin-right: 0; color: #1e293b; } 
         
         .liuqin-zhi { width: 75px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
         .nayin-box { width: 65px; display: none; font-size: 11px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: left; }
@@ -360,12 +397,6 @@
         "兌艮":"澤山咸", "震兌":"雷澤歸妹"
     };
 
-    const customGuaNames = {
-        "巽艮":"風山漸", "離艮":"火山旅", "艮坎":"山水蒙", "巽坎":"風水渙", "震坎":"雷水解", 
-        "水震":"水雷屯", "雷離":"雷火豐", "坤震":"地雷復"
-    };
-
-    // ➔ 【核心重大修正點】：建立精準的京房易八宮全對照表，完美搞定「世應位置」與「遊魂歸魂」
     const jingFangEightGongs = {
         "乾": ["乾為天", "天風姤", "天山遁", "天地否", "風地觀", "山地剝", "火地晉", "火天大有"],
         "兌": ["兌為澤", "澤水困", "澤地萃", "澤山咸", "水山蹇", "地山謙", "雷山小過", "雷澤歸妹"],
@@ -377,8 +408,7 @@
         "坤": ["坤為地", "地雷復", "地澤臨", "地天泰", "雷天大壯", "澤天夬", "水天需", "水地比"]
     };
 
-    // 依據卦在八宮中的順序，精確回傳世爻位置 (1~6) 以及遊歸魂標記
-    const gongIndexToShiYao = [6, 1, 2, 3, 4, 5, 4, 3]; // 0=本宮(6世), 1=一世, 2=二世, 3=三世, 4=四世, 5=五世, 6=遊魂(4世), 7=歸魂(3世)
+    const gongIndexToShiYao = [6, 1, 2, 3, 4, 5, 4, 3]; 
 
     const yaoOptions = [
         { value: 1, text: "少陽 ( — )" },
@@ -515,8 +545,8 @@
             let matchChong = chongPairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchChong) isChong = false;
             let matchHe = hePairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchHe) isHe = false;
         }
-        if(isChong) return " (六沖)";
-        if(isHe) return " (六合)";
+        if(isChong) return "六沖";
+        if(isHe) return "六合";
         return "";
     }
 
@@ -535,30 +565,41 @@
         let lowName = baguaCode[lowStr]; let upName = baguaCode[upStr];
         
         let combinedKey = upName + lowName;
-        let rawName = guaName64[combinedKey] || customGuaNames[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
+        let rawName = guaName64[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
         
-        // ➔ 【全新世應演算法】：完全查表對照京房八宮，精準無誤
         let findRes = findGuaGongAndIndex(rawName);
         let finalGong = findRes.gong;
         let gongIdx = findRes.index;
         let shi = gongIndexToShiYao[gongIdx];
 
-        // 判定遊魂與歸魂
-        let youGuiSuffix = "";
-        if (gongIdx === 6) youGuiSuffix = " (遊魂)";
-        if (gongIdx === 7) youGuiSuffix = " (歸魂)";
-
-        let gansOut = []; let zhisOut = [];
+        let patternList = [];
+        
         let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
-        for(let i=0; i<3; i++) { gansOut.push(lowData.gan[i]); zhisOut.push(lowData.zhi[i]); }
-        for(let i=0; i<3; i++) { gansOut.push(upData.gan[i]); zhisOut.push(upData.zhi[i]); }
+        let zhisOut = [];
+        for(let i=0; i<3; i++) zhisOut.push(lowData.zhi[i]);
+        for(let i=0; i<3; i++) zhisOut.push(upData.up ? upData.zhi[i] : naJiaBase[upName].up.zhi[i]);
         
-        let chongHeSuffix = checkChongHe(zhisOut);
+        let chongHeRes = checkChongHe(zhisOut);
+        if(chongHeRes) patternList.push(chongHeRes);
         
-        // 結合六沖六合與遊魂歸魂的後綴
-        let fullSuffix = chongHeSuffix + youGuiSuffix;
+        if (gongIdx === 6) patternList.push("游魂");
+        if (gongIdx === 7) patternList.push("歸魂");
 
-        return { name: rawName, gong: finalGong, shi: shi, gans: gansOut, zhis: zhisOut, wuxing: naJiaBase[finalGong].wuxing, chongHe: fullSuffix };
+        let patternStr = patternList.length > 0 ? ` (${patternList.join('・')})` : "";
+        
+        let gansOut = [];
+        for(let i=0; i<3; i++) gansOut.push(lowData.gan[i]);
+        for(let i=0; i<3; i++) gansOut.push(naJiaBase[upName].up.gan[i]);
+
+        return { 
+            name: rawName, 
+            gong: finalGong, 
+            shi: shi, 
+            gans: gansOut, 
+            zhis: zhisOut, 
+            wuxing: naJiaBase[finalGong].wuxing, 
+            pattern: patternStr 
+        };
     }
 
     function getLiuQin(gongWX, yaoZhi) {
@@ -605,27 +646,38 @@
         }
 
         let pureArr = [];
-        if(gongName==="乾") pureArr=[1,1,1,1,1,1]; else if(gongName==="坤") pureArr=[0,0,0,0,0,0];
-        else if(gongName==="震") pureArr=[1,0,0,1,0,0]; else if(gongName==="巽") pureArr=[0,1,1,0,1,1];
-        else if(gongName==="坎") pureArr=[0,1,0,0,1,0]; else if(gongName==="離") pureArr=[1,0,1,1,0,1];
-        else if(gongName==="艮") pureArr=[1,0,0,1,0,0]; else if(gongName==="兌") pureArr=[0,1,1,0,1,1];
+        if(gongName==="乾") pureArr=[1,1,1,1,1,1];      
+        else if(gongName==="坤") pureArr=[0,0,0,0,0,0]; 
+        else if(gongName==="震") pureArr=[1,0,0,1,0,0]; 
+        else if(gongName==="巽") pureArr=[0,1,1,0,1,1]; 
+        else if(gongName==="坎") pureArr=[0,1,0,0,1,0]; 
+        else if(gongName==="離") pureArr=[1,0,1,1,0,1]; 
+        else if(gongName==="艮") pureArr=[0,0,1,0,0,1]; 
+        else if(gongName==="兌") pureArr=[1,1,0,1,1,0]; 
         
         let lowName = baguaCode[pureArr.slice(0,3).join("")]; 
         let upName = baguaCode[pureArr.slice(3,6).join("")];
+        
         let lowData = naJiaBase[lowName].low; 
         let upData = naJiaBase[upName].up;
         
-        let pureZhis = [...lowData.zhi, ...upData.zhi];
+        let pureGanzhi = [
+            { gan: lowData.gan[0], zhi: lowData.zhi[0] },
+            { gan: lowData.gan[1], zhi: lowData.zhi[1] },
+            { gan: lowData.gan[2], zhi: lowData.zhi[2] },
+            { gan: upData.gan[0], zhi: upData.zhi[0] },
+            { gan: upData.gan[1], zhi: upData.zhi[1] },
+            { gan: upData.gan[2], zhi: upData.zhi[2] }
+        ];
 
         let resultList = []; 
         for(let i=0; i<6; i++) {
-            let pureLQ = getLiuQin(gongWX, pureZhis[i]);
-            let pureWX = wuxing[pureZhis[i]];
-            let displayText = `${pureLQ}${pureZhis[i]}${pureWX}`;
+            let pureLQ = getLiuQin(gongWX, pureGanzhi[i].zhi);
+            let displayString = `${pureLQ}${pureGanzhi[i].gan}${pureGanzhi[i].zhi}${wuxing[pureGanzhi[i].zhi]}`;
             let isFuYao = !mainGuaLiuqins.includes(pureLQ);
             
             resultList.push({
-                text: displayText,
+                text: displayString,
                 isFu: isFuYao
             });
         }
@@ -673,185 +725,241 @@
         htm += `  <div class="meta-line"><b>西元時間：</b>${year} 年 ${month} 月 ${date} 日 ${hourVal} 時 ${minVal} 分</div>`;
         htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGZ}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
         
+        // ➔ 【優化】：神煞流式緊湊排版，全量顯示、兩兩緊貼，中間無冗餘表格空格
         let ssDisplay = showShenshaState ? "block" : "none";
-        // ➔ 【優化修正點】：將「精算神煞」修正為「神煞」
-        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};"><b>神煞：</b>`;
-        htm += `貴人-${sha["貴人"]} &nbsp;祿神-${sha["日祿"]} &nbsp;羊刃-${sha["羊刃"]} &nbsp;文昌-${sha["文昌"]} &nbsp;驛馬-${sha["驛馬"]} &nbsp;桃花-${sha["桃花"]} &nbsp;將星-${sha["將星"]} &nbsp;華蓋-${sha["華蓋"]}<br>`;
-        htm += `災煞-${sha["災煞"]} &nbsp;劫煞-${sha["劫煞"]} &nbsp;謀星-${sha["謀星"]} &nbsp;天醫-${sha["天醫"]} &nbsp;天喜-${sha["天喜"]}`;
+        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};">`;
+        htm += `    <div class="shensha-wrapper">`;
+        htm += `      <span class="shensha-title">神煞：</span>`;
+        htm += `      <span class="shensha-item">天乙貴人[${sha["貴人"]}]</span>`;
+        htm += `      <span class="shensha-item">祿神[${sha["日祿"]}]</span>`;
+        htm += `      <span class="shensha-item">羊刃[${sha["羊刃"]}]</span>`;
+        htm += `      <span class="shensha-item">文昌[${sha["文昌"]}]</span>`;
+        htm += `      <span class="shensha-item">驛馬[${sha["驛馬"]}]</span>`;
+        htm += `      <span class="shensha-item">桃花[${sha["桃花"]}]</span>`;
+        htm += `      <span class="shensha-item">將星[${sha["將星"]}]</span>`;
+        htm += `      <span class="shensha-item">華蓋[${sha["華蓋"]}]</span>`;
+        htm += `      <span class="shensha-item">災煞[${sha["災煞"]}]</span>`;
+        htm += `      <span class="shensha-item">天醫[${sha["天醫"]}]</span>`;
+        htm += `      <span class="shensha-item">天喜[${sha["天喜"]}]</span>`;
+        htm += `      <span class="shensha-item">謀星[${sha["謀星"]}]</span>`;
+        htm += `    </div>`;
         htm += `  </div>`;
         htm += `</div>`;
 
         htm += `<div class="paipan-grid">`;
         htm += `  <div class="liushen-col">`;
-        for(let i=5; i>=0; i--) { htm += `    <div class="yao-row">${liuShouArr[(liuShouOrder + i) % 6]}</div>`; }
+        for(let i=5; i>=0; i--) {
+            let lsName = liuShouArr[(liuShouOrder + i) % 6];
+            htm += `    <div class="yao-row"><b>${lsName}</b></div>`;
+        }
         htm += `  </div>`;
 
         let fDisplay = showFushenState ? "flex" : "none";
         htm += `  <div class="fushen-col" id="fushen-col-id" style="display:${fDisplay};">`;
-        for(let i=5; i>=0; i--) { 
-            let yaoObj = cangYaoData[i];
-            let textColor = yaoObj.isFu ? "#16a34a" : "#64748b";
-            let prefix = yaoObj.isFu ? "★" : "　"; 
-            htm += `    <div class="yao-row" style="color:${textColor}; font-weight:${yaoObj.isFu?'bold':'normal'};">${prefix}${yaoObj.text}</div>`; 
+        for(let i=5; i>=0; i--) {
+            let cy = cangYaoData[i];
+            htm += `    <div class="yao-row">`;
+            if(cy.isFu) {
+                htm += `<span class="fushen-star">★</span><span class="hidden-yao-highlight">${cy.text}</span>`;
+            } else {
+                htm += `<span class="hidden-yao-normal">&nbsp;&nbsp;${cy.text}</span>`;
+            }
+            htm += `    </div>`;
         }
         htm += `  </div>`;
 
         htm += `  <div class="gua-col">`;
         htm += `    <div class="gua-header">`;
-        htm += `      <div class="gua-title">本卦 ${mainInfo.gong}宮：${mainInfo.name}${mainInfo.chongHe}</div>`;
+        htm += `      <div class="gua-title">本卦：${mainInfo.gong}宮 [${mainInfo.wuxing}]：${mainInfo.name}${mainInfo.pattern}</div>`;
         if(!isQuietGua) {
-            htm += `      <div class="gua-title change-title">變卦 ${changeInfo.gong}宮：${changeInfo.name}${changeInfo.chongHe}</div>`;
+            // ➔ 【優化】：變卦標題同步修正為與本卦相同的經典藍色 (#0284c7)
+            htm += `      <div class="gua-title change-title">變卦：${changeInfo.gong}宮 [${changeInfo.wuxing}]：${changeInfo.name}${changeInfo.pattern}</div>`;
         }
         htm += `    </div>`;
 
-        for(let i = 5; i >= 0; i--) {
-            let yaoNum = currentGua[i];
+        for(let i=5; i>=0; i--) {
             htm += `    <div class="yao-row">`;
-
-            // 本卦
+            
+            // 1. 本卦
             htm += `      <div class="yao-part">`;
+            let mLQ = getLiuQin(mainInfo.wuxing, mainInfo.zhis[i]);
+            let mGan = mainInfo.gans[i];
             let mZhi = mainInfo.zhis[i];
-            let mLiuQin = getLiuQin(mainInfo.wuxing, mZhi);
             let mWX = wuxing[mZhi];
-            let mShiYing = (mainInfo.shi === (i+1)) ? "世" : (((mainInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
-            let mNY = nayinMap[mainInfo.gans[i] + mZhi] || "";
-
-            htm += `        <span class="liuqin-zhi">${mLiuQin}${mZhi}${mWX}</span>`;
-            htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${mNY}]</span>`;
-            htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(yaoNum===1||yaoNum===3)?'yang':'yin'}"></span></span>`;
-            htm += `        <span class="shi-ying">${mShiYing}</span>`;
+            let mNy = nayinMap[mGan+mZhi] || "";
+            let nyDisp = showNayinState ? "inline-block" : "none";
+            htm += `        <span class="liuqin-zhi">${mLQ}${mGan}${mZhi}${mWX}</span>`;
+            htm += `        <span class="nayin-box" style="display:${nyDisp};">[${mNy}]</span>`;
+            
+            let lineType = (currentGua[i] === 1 || currentGua[i] === 3) ? "yang" : "yin";
+            htm += `        <span class="yao-line-container"><span class="yao-line-pic ${lineType}"></span></span>`;
+            
+            let seStr = "";
+            if(mainInfo.shi === (i+1)) seStr = "世";
+            else if(mainInfo.shi > 3 && (mainInfo.shi-3) === (i+1)) seStr = "應";
+            else if(mainInfo.shi <= 3 && (mainInfo.shi+3) === (i+1)) seStr = "應";
+            htm += `        <span class="shi-ying">${seStr}</span>`;
+            
+            let mDong = "";
+            if(currentGua[i] === 3) mDong = "○";
+            if(currentGua[i] === 0) mDong = "×";
+            htm += `        <span class="dong-mark">${mDong}</span>`;
             htm += `      </div>`;
 
-            // 變卦
+            // 2. 變卦
             if(!isQuietGua) {
+                // ➔ 【優化】：移除靜爻灰色淡化，變卦文字與本卦完全維持相同的深色調（#1e293b）
                 htm += `      <div class="yao-part change-part">`;
-                let cMark = (yaoNum === 3) ? "○➔" : ((yaoNum === 0) ? "╳➔" : "  ");
+                
+                let cLQ = getLiuQin(mainInfo.wuxing, changeInfo.zhis[i]);
+                let cGan = changeInfo.gans[i];
                 let cZhi = changeInfo.zhis[i];
-                
-                let cLiuQin = getLiuQin(mainInfo.wuxing, cZhi);
-                
                 let cWX = wuxing[cZhi];
-                let cShiYing = (changeInfo.shi === (i+1)) ? "世" : (((changeInfo.shi + 3) % 6 === (i+1) % 6) ? "應" : " ");
-                let cNY = nayinMap[changeInfo.gans[i] + cZhi] || "";
-
-                htm += `        <span class="dong-mark">${cMark}</span>`;
-                htm += `        <span class="liuqin-zhi">${cLiuQin}${cZhi}${cWX}</span>`;
-                htm += `        <span class="nayin-box" style="display:${showNayinState?'inline-block':'none'}">[${cNY}]</span>`;
-                htm += `        <span class="yao-line-container"><span class="yao-line-pic ${(changeGuaArr[i]===1)?'yang':'yin'}"></span></span>`;
-                htm += `        <span class="shi-ying">${cShiYing}</span>`;
+                let cNy = nayinMap[cGan+cZhi] || "";
+                
+                htm += `        <span class="liuqin-zhi">${cLQ}${cGan}${cZhi}${cWX}</span>`;
+                htm += `        <span class="nayin-box" style="display:${nyDisp};">[${cNy}]</span>`;
+                
+                let cLineType = (changeGuaArr[i] === 1) ? "yang" : "yin";
+                htm += `        <span class="yao-line-container"><span class="yao-line-pic ${cLineType}"></span></span>`;
+                
+                let cSeStr = "";
+                if(changeInfo.shi === (i+1)) cSeStr = "世";
+                else if(changeInfo.shi > 3 && (changeInfo.shi-3) === (i+1)) cSeStr = "應";
+                else if(changeInfo.shi <= 3 && (changeInfo.shi+3) === (i+1)) cSeStr = "應";
+                htm += `        <span class="shi-ying">${cSeStr}</span>`;
+                
                 htm += `      </div>`;
             }
 
-            htm += `    </div>`; 
+            htm += `    </div>`;
         }
 
         htm += `  </div>`;
-        htm += `</div>`;  
+        htm += `</div>`;
 
         document.getElementById("board-content").innerHTML = htm;
-        document.getElementById("paipan-board").style.display = "block";
         document.getElementById("board-controls").style.display = "flex";
+        document.getElementById("paipan-board").style.display = "block";
         
-        if(showFushenState) {
-            document.getElementById("btn-fushen").classList.add("active");
-            document.getElementById("btn-fushen").innerText = "隱藏 藏爻";
-        } else {
-            document.getElementById("btn-fushen").classList.remove("active");
-            document.getElementById("btn-fushen").innerText = "顯示 藏爻";
-        }
-        if(showNayinState) document.getElementById("btn-nayin").classList.add("active");
-        if(showShenshaState) document.getElementById("btn-shensha").classList.add("active");
+        let btnNayin = document.getElementById("btn-nayin");
+        if(showNayinState) btnNayin.classList.add("active"); else btnNayin.classList.remove("active");
+        let btnFushen = document.getElementById("btn-fushen");
+        if(showFushenState) { btnFushen.classList.add("active"); btnFushen.innerText="隱藏 藏爻"; } else { btnFushen.classList.remove("active"); btnFushen.innerText="顯示 藏爻"; }
+        let btnShensha = document.getElementById("btn-shensha");
+        if(showShenshaState) { btnShensha.classList.add("active"); btnShensha.innerText="隱藏 神煞"; } else { btnShensha.classList.remove("active"); btnShensha.innerText="顯示 神煞"; }
     }
 
     function saveToHistory() {
-        let memo = document.getElementById("memo").value || "未命名占卜";
-        let dateStr = `${document.getElementById("year").value}/${document.getElementById("month").value}/${document.getElementById("date").value}`;
+        if(!currentRecordId) return;
+        let memo = document.getElementById("memo").value || "未填寫";
+        let year = document.getElementById("year").value;
+        let month = document.getElementById("month").value;
+        let date = document.getElementById("date").value;
+        let hour = document.getElementById("hour").value;
+        let min = document.getElementById("minute").value;
+        let dayGan = document.getElementById("day-gan").value;
+        let dayZhi = document.getElementById("day-zhi").value;
+        let monthZhi = document.getElementById("month-zhi").value;
         let notes = document.getElementById("gua-notes").value;
 
-        let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        let existingIndex = history.findIndex(x => x.id === currentRecordId);
+        let mainGuaArr = currentGua.map(y => (y === 1 || y === 3) ? 1 : 0);
+        let mainInfo = buildGuaDetails(mainGuaArr);
 
         let record = {
-            id: currentRecordId || Date.now(), 
-            memo: memo, date: dateStr,
-            hour: document.getElementById("hour").value, minute: document.getElementById("minute").value, 
-            dayGan: document.getElementById("day-gan").value, dayZhi: document.getElementById("day-zhi").value,
-            monthZhi: document.getElementById("month-zhi").value, gua: [...currentGua],
-            notes: notes
+            id: currentRecordId,
+            memo: memo,
+            timeStr: `${year}-${month}-${date} ${hour.padStart(2,'0')}:${min.padStart(2,'0')}`,
+            ganzhiStr: `${dayGan}${dayZhi}日(${monthZhi}月)`,
+            guaName: mainInfo.name,
+            guaData: [...currentGua],
+            notes: notes,
+            inputs: { year, month, date, hour, min, dayGan, dayZhi, monthZhi }
         };
 
-        if (existingIndex !== -1) {
-            history[existingIndex] = record; 
-        } else {
-            currentRecordId = record.id; 
-            if (history.length > 0 && history[0].memo === memo && history[0].gua.toString() === currentGua.toString() && !notes) { return; }
-            history.unshift(record);
-        }
-
-        localStorage.setItem("sixyao_history", JSON.stringify(history)); 
+        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
+        let idx = history.findIndex(r => r.id === currentRecordId);
+        if(idx !== -1) { history[idx] = record; } else { history.unshift(record); }
+        localStorage.setItem("liuxiao_history", JSON.stringify(history));
         renderHistory();
     }
 
     function autoSaveNotes() {
-        if (!currentRecordId) { currentRecordId = Date.now(); }
+        if(!currentRecordId) return;
+        let statusEl = document.getElementById("save-status");
+        statusEl.innerText = "正在儲存...";
         saveToHistory();
-        
-        let statusSpan = document.getElementById("save-status");
-        statusSpan.innerText = "已自動儲存筆記...";
-        setTimeout(() => { statusSpan.innerText = ""; }, 1500);
+        setTimeout(() => { statusEl.innerText = "密記已自動儲存"; }, 400);
     }
 
     function renderHistory() {
-        let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
+        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
         let container = document.getElementById("history-container");
-        if(history.length === 0) { container.innerHTML = `<div style="text-align:center; color:#666; padding:10px; font-size:12px;">暫無占卦紀錄</div>`; return; }
-        container.innerHTML = history.map(item => `
-            <div class="history-item">
-                <div class="history-info" onclick="loadHistory(${item.id})">
-                    <span style="color:#ff9800; font-weight:bold;">● [${item.date}]</span> 
-                    <span style="color:#fff; margin-left:5px;">${item.memo}</span>
-                    ${item.notes ? '<span style="color:#10b981; font-size:11px; margin-left:8px;">[有筆記]</span>' : ''}
-                </div>
-                <button style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:11px;" onclick="deleteHistory(${item.id}, event)">刪除</button>
-            </div>
-        `).join("");
+        if(history.length === 0) {
+            container.innerHTML = `<div style="padding:10px; color:#666; text-align:center;">暫無占卦紀錄</div>`;
+            return;
+        }
+        let htm = "";
+        history.forEach(r => {
+            htm += `<div class="history-item">`;
+            htm += `  <div class="history-info" onclick="loadRecord(${r.id})">`;
+            htm += `    <span style="color:#ffca28; font-weight:bold;">[${r.guaName}]</span> `;
+            htm += `    <span style="color:#fff;">${r.memo}</span> `;
+            htm += `    <span style="color:#888; font-size:11px;">(${r.timeStr} | ${r.ganzhiStr})</span>`;
+            htm += `  </div>`;
+            htm += `  <button style="background:#444; font-size:11px; padding:1px 5px;" onclick="deleteRecord(${r.id})">刪除</button>`;
+            htm += `</div>`;
+        });
+        container.innerHTML = htm;
     }
 
-    function loadHistory(id) {
-        let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        let item = history.find(x => x.id === id); if(!item) return;
-        
-        currentRecordId = item.id; 
-        document.getElementById("memo").value = item.memo;
-        let parts = item.date.split("/");
-        document.getElementById("year").value = parts[0]; document.getElementById("month").value = parts[1]; document.getElementById("date").value = parts[2];
-        document.getElementById("hour").value = item.hour; if(item.minute) document.getElementById("minute").value = item.minute; 
-        document.getElementById("day-gan").value = item.dayGan; document.getElementById("day-zhi").value = item.dayZhi; document.getElementById("month-zhi").value = item.monthZhi;
-        
-        currentGua = [...item.gua]; 
-        syncGuaToSelectors(); 
-        document.getElementById("gua-notes").value = item.notes || "";
-        
+    function loadRecord(id) {
+        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
+        let r = history.find(item => item.id === id);
+        if(!r) return;
+
+        currentRecordId = r.id;
+        currentGua = [...r.guaData];
+        syncGuaToSelectors();
+
+        document.getElementById("memo").value = r.memo;
+        if(r.inputs) {
+            document.getElementById("year").value = r.inputs.year;
+            document.getElementById("month").value = r.inputs.month;
+            document.getElementById("date").value = r.inputs.date;
+            document.getElementById("hour").value = r.inputs.hour;
+            document.getElementById("minute").value = r.inputs.min;
+            document.getElementById("day-gan").value = r.inputs.dayGan;
+            document.getElementById("day-zhi").value = r.inputs.dayZhi;
+            document.getElementById("month-zhi").value = r.inputs.monthZhi;
+        }
+        document.getElementById("gua-notes").value = r.notes || "";
+        document.getElementById("save-status").innerText = "";
         updateDisplay();
     }
 
-    function deleteHistory(id, event) {
-        if(event) event.stopPropagation(); 
-        let history = JSON.parse(localStorage.getItem("sixyao_history")) || [];
-        history = history.filter(x => x.id !== id); 
-        localStorage.setItem("sixyao_history", JSON.stringify(history)); 
-        if(currentRecordId === id) { currentRecordId = null; } 
+    function deleteRecord(id) {
+        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
+        history = history.filter(item => item.id !== id);
+        localStorage.setItem("liuxiao_history", JSON.stringify(history));
+        if(currentRecordId === id) {
+            currentRecordId = null;
+            document.getElementById("paipan-board").style.display = "none";
+            document.getElementById("board-controls").style.display = "none";
+        }
         renderHistory();
     }
 
-    function clearHistory() { 
-        if(confirm("確定要清空所有占卦歷史紀錄嗎？")) { 
-            localStorage.clear(); 
+    function clearHistory() {
+        if(confirm("確定要清空所有歷史占卦紀錄嗎？此動作無法復原。")) {
+            localStorage.removeItem("liuxiao_history");
             currentRecordId = null;
-            document.getElementById("gua-notes").value = "";
-            renderHistory(); 
-        } 
+            document.getElementById("paipan-board").style.display = "none";
+            document.getElementById("board-controls").style.display = "none";
+            renderHistory();
+        }
     }
 </script>
+
 </body>
 </html>
