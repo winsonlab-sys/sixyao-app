@@ -2,1014 +2,116 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V8.2 (神煞校正放大版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歌詞查詢系統</title>
     <style>
         body {
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            padding: 10px;
-            max-width: 950px;
-            margin: 0 auto;
-            transform-origin: top center;
-            transition: transform 0.1s ease-out;
-        }
-        h1 { text-align: center; color: #ffca28; margin: 5px 0 15px 0; font-size: 24px; letter-spacing: 2px; }
-        .card {
-            background: #1e1e1e;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #333;
-        }
-        .form-group {
-            margin-bottom: 10px;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f4f7f6;
             display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        label { font-size: 14px; color: #b0b0b0; width: 75px; font-weight: bold; }
-        select, button, input, textarea {
-            padding: 6px 8px;
-            font-size: 14px;
-            border-radius: 4px;
-            background: #2b2b2b;
-            color: #fff;
-            border: 1px solid #444;
-        }
-        select { flex: 1; min-width: 65px; }
-        input[type="text"] { flex: 1; background: #151515; border: 1px solid #555; color: #fff; }
-        textarea { 
-            width: 100%; 
-            box-sizing: border-box; 
-            background: #151515; 
-            border: 1px solid #555; 
-            color: #fff; 
-            font-family: inherit;
-            resize: vertical;
-        }
-        button {
-            background-color: #ff9800;
-            color: #000;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        button:hover { background-color: #ffa726; }
-        button.secondary { background-color: #444; color: #fff; }
-        button.action-btn { background-color: #0284c7; color: #fff; font-size: 13px; padding: 5px 10px; }
-        button.action-btn:hover { background-color: #0369a1; }
-        button.action-btn.active { background-color: #16a34a; }
-        
-        .manual-selectors {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 10px;
-            background: #181818;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #2a2a2a;
-        }
-        .yao-select-row { display: flex; align-items: center; gap: 10px; }
-        .yao-label { width: 50px; font-size: 14px; color: #ffca28; font-weight: bold; text-align: right; }
-        .yao-select-row select { flex: 1; background: #222; border-color: #444; }
-        
-        /* 排盤結果區塊 */
-        .output-container {
-            background-color: #f8fafc;
-            color: #1e293b;
-            padding: 15px 20px;
-            border-radius: 6px;
-            font-family: "PingFang TC", "Microsoft JhengHei", monospace;
-            font-size: 15px;
-            font-weight: bold;
-            line-height: 1.6;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .meta-section { margin-bottom: 10px; font-size: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-        .meta-line { margin-bottom: 4px; }
-        .highlight-red { color: #dc2626; }
-        .highlight-blue { color: #2563eb; }
-        
-        .shensha-line {
-            display: none;
-            margin-top: 6px; 
-            font-weight: normal; 
-            color: #334155;
-            background-color: #f1f5f9;
-            padding: 6px 10px;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
-        }
-        .shensha-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px 8px;
-            align-items: center;
-            font-size: 14px;
-        }
-        .shensha-title {
-            font-weight: bold;
-            color: #0f172a;
-            margin-right: 2px;
-        }
-        .shensha-item {
-            background-color: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            white-space: nowrap;
-        }
-        
-        .paipan-grid { 
-            display: flex; 
-            width: 100%; 
-            margin-top: 5px; 
-            justify-content: flex-start;
-        }
-        
-        .liushen-col { 
-            width: 60px; 
-            display: flex; 
-            flex-direction: column; 
-            color: #475569; 
-            padding-top: 32px; 
-        }
-        
-        .fushen-col {
-            width: 110px;
-            display: none; 
-            flex-direction: column;
-            padding-top: 32px;
-            border-right: 1px dashed #cbd5e1;
-            margin-right: 10px;
-            white-space: nowrap;
-            letter-spacing: -0.5px;
-        }
-        .fushen-star {
-            color: #228B22; 
-            font-weight: bold;
-            margin-right: 2px; 
-        }
-        .hidden-yao-highlight {
-            color: #228B22; 
-            font-weight: bold;
-        }
-        .hidden-yao-normal {
-            color: #64748b; 
-            font-weight: normal;
-        }
-        
-        .gua-col { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            max-width: 100%;
-        }
-        
-        .gua-header { 
-            display: flex; 
-            border-bottom: 1px solid #cbd5e1; 
-            padding-bottom: 3px; 
-            margin-bottom: 8px; 
-            color: #0f172a; 
-        }
-        .gua-title { width: 250px; text-align: left; font-size: 15px; color: #0284c7; font-weight: 800; padding-left: 5px; }
-        .gua-title.change-title { width: 260px; padding-left: 20px; color: #0284c7; }
-
-        .yao-row { display: flex; align-items: center; height: 32px; }
-        
-        .yao-part { width: 220px; display: flex; align-items: center; position: relative; margin-right: 15px; color: #1e293b; }
-        .yao-part.change-part { width: 250px; margin-right: 0; color: #1e293b; } 
-        
-        .liuqin-zhi { width: 80px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
-        .nayin-box { width: 70px; display: none; font-size: 12px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: left; }
-        .yao-line-container { width: 90px; display: inline-flex; align-items: center; justify-content: center; }
-        .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 14px; }
-        .dong-mark { width: 35px; text-align: center; color: #dc2626; font-weight: bold; font-size: 15px; }
-        
-        .yao-line-pic { display: inline-block; height: 10px; vertical-align: middle; }
-        .yao-line-pic.yang { width: 80px; background-color: #000; }
-        .yao-line-pic.yin { width: 80px; background-image: linear-gradient(to right, #000 33.3%, transparent 33.3%, transparent 66.6%, #000 66.6%); }
-
-        .history-list { max-height: 150px; overflow-y: auto; margin-top: 10px; }
-        .history-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 6px; background: #262626; border-bottom: 1px solid #333; font-size: 13px;
-        }
-        .history-item:hover { background: #333; }
-        .history-info { flex: 1; cursor: pointer; }
-
-        .notes-section {
-            margin-top: 15px;
-            border-top: 1px dashed #cbd5e1;
-            padding-top: 12px;
-            color: #1e293b;
-        }
-        .notes-title {
-            font-size: 14px;
-            color: #475569;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .zoom-controls {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            display: flex;
-            gap: 6px;
-            z-index: 9999;
-            background: rgba(0,0,0,0.6);
-            padding: 4px;
-            border-radius: 6px;
-        }
-        .zoom-btn {
-            background: #222;
-            color: #fff;
-            border: 1px solid #555;
-            width: 38px;
-            height: 38px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            cursor: pointer;
+            padding-top: 50px;
         }
-        .zoom-btn:active { background: #ff9800; color: #000; }
-        
-        .ganzhi-display-line {
-            background: #252525;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: 1px solid #3d3d3d;
-            font-size: 14px;
-            color: #ffca28;
-            font-weight: bold;
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
             display: flex;
             gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        .ganzhi-display-line select {
-            background: #1a1a1a;
-            color: #ffca28;
-            border: 1px solid #555;
-            padding: 3px 5px;
-            font-weight: bold;
-            flex: none;
-            min-width: 50px;
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            min-height: 100px;
+            white-space: pre-wrap; /* 保持歌詞換行格式 */
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
-    <h1>專業六爻排盤系統</h1>
-
-    <div class="card">
-        <div class="form-group">
-            <label>所問之事：</label>
-            <input type="text" id="memo" placeholder="例如：測今年財運、某項目能否成功...">
-        </div>
-
-        <div class="form-group">
-            <label>占卜時間：</label>
-            <select id="year" onchange="autoCalcTimeGZ()"></select>年
-            <select id="month" onchange="autoCalcTimeGZ()"></select>月
-            <select id="date" onchange="autoCalcTimeGZ()"></select>日
-            <select id="hour" onchange="autoCalcTimeGZ()"></select>時
-            <select id="minute" onchange="autoCalcTimeGZ()"></select>分
-        </div>
-
-        <div class="form-group">
-            <label>對應干支：</label>
-            <div class="ganzhi-display-line">
-                <select id="gz-year-gan" onchange="syncManualGZ()"></select><select id="gz-year-zhi" onchange="syncManualGZ()"></select>年 &nbsp;
-                <select id="gz-month-gan" onchange="syncManualGZ()"></select><select id="gz-month-zhi" onchange="syncManualGZ()"></select>月 &nbsp;
-                <select id="gz-day-gan" onchange="syncManualGZ()"></select><select id="gz-day-zhi" onchange="syncManualGZ()"></select>日 &nbsp;
-                <select id="gz-hour-gan" onchange="syncManualGZ()"></select><select id="gz-hour-zhi" onchange="syncManualGZ()"></select>時
-                <span id="gz-xunkong-text" style="color:#f43f5e; margin-left:10px; font-size:14px;">(日空：計算中)</span>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-            <button style="flex: 2;" onclick="autoRoll()">電腦起卦 (隨記產生六爻)</button>
-            <button class="secondary" style="flex: 1;" onclick="manualSubmit();">手動排盤</button>
-        </div>
-
-        <div class="manual-selectors">
-            <div class="yao-select-row">
-                <span class="yao-label">上爻：</span>
-                <select id="yao-5"></select>
-            </div>
-            <div class="yao-select-row">
-                <span class="yao-label">五爻：</span>
-                <select id="yao-4"></select>
-            </div>
-            <div class="yao-select-row">
-                <span class="yao-label">四爻：</span>
-                <select id="yao-3"></select>
-            </div>
-            <div class="yao-select-row">
-                <span class="yao-label">三爻：</span>
-                <select id="yao-2"></select>
-            </div>
-            <div class="yao-select-row">
-                <span class="yao-label">二爻：</span>
-                <select id="yao-1"></select>
-            </div>
-            <div class="yao-select-row">
-                <span class="yao-label">初爻：</span>
-                <select id="yao-0"></select>
-            </div>
-        </div>
+<div class="container">
+    <h2>中 / 日 / 台語 歌詞查詢</h2>
+    <div class="input-group">
+        <input type="text" id="songInput" placeholder="請輸入歌名 (例如: 晴天 / 𬀩日 / 津軽海峡・冬景色)">
+        <button onclick="searchLyrics()">查詢</button>
     </div>
 
-    <div id="board-controls" style="margin-bottom:10px; display:none; text-align:right; gap:10px; justify-content:flex-end;">
-        <button id="btn-shensha" class="action-btn" onclick="toggleShensha()">顯示 神煞</button>
-        <button id="btn-fushen" class="action-btn" onclick="toggleFushen()">顯示 藏爻</button>
-        <button id="btn-nayin" class="action-btn" onclick="toggleNayin()">顯示 納音</button>
+    <div id="result" class="result-box">
+        請在上方輸入歌名並按下「查詢」。
     </div>
-
-    <div id="paipan-board" class="output-container" style="display:none;">
-        <div id="board-content"></div>
-        
-        <div class="notes-section">
-            <div class="notes-title">
-                <span>📝 斷卦筆記（內容自動儲存至當前紀錄）</span>
-                <span id="save-status" style="color: #16a34a; font-weight: normal; font-size: 12px;"></span>
-            </div>
-            <textarea id="gua-notes" rows="4" placeholder="在此輸入此卦的吉凶判斷、應期、神煞取用等分析..." oninput="autoSaveNotes()"></textarea>
-        </div>
-    </div>
-
-    <div class="card" style="margin-top:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:5px;">
-            <h3 style="margin:0; font-size:14px; color:#ffca28;">歷史占卦紀錄</h3>
-            <button style="font-size:12px; padding:2px 6px; background:#dc2626; color:#fff;" onclick="clearHistory()">清空紀錄</button>
-        </div>
-        <div id="history-container" class="history-list"></div>
-    </div>
-
-    <div class="zoom-controls">
-        <div class="zoom-btn" onclick="adjustZoom(0.05)">＋</div>
-        <div class="zoom-btn" onclick="adjustZoom(-0.05)">－</div>
-        <div class="zoom-btn" style="font-size:12px;" onclick="resetZoom()">重設</div>
-    </div>
+</div>
 
 <script>
-    let currentGua = [1, 1, 1, 1, 1, 1]; 
-    let showNayinState = false; 
-    let showFushenState = false; 
-    let showShenshaState = false; 
+function searchLyrics() {
+    const songName = document.getElementById('songInput').value.trim();
+    const resultDiv = document.getElementById('result');
+
+    if (!songName) {
+        alert('請輸入歌名！');
+        return;
+    }
+
+    resultDiv.innerHTML = "搜尋中，請稍候...";
+
+    // 方案 A：直接跳轉至 Google 歌詞搜尋（最穩定且合規的方式）
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(songName + ' 歌詞')}`;
     
-    // ➔ 【優化】：將初始比例放大3個級距（從0.90提高到1.05），手機版依舊支援自適應
-    let currentScale = 1.05; 
+    resultDiv.innerHTML = `
+        <p>已為您準備好「<strong>${songName}</strong>」的歌詞搜尋連結：</p>
+        <p><a href="${searchUrl}" target="_blank" style="color: #007bff; font-weight: bold;">點此在新分頁查看完整合法歌詞</a></p>
+        <hr>
+        <p style="font-size: 12px; color: #666;">註：由於各音樂平台歌詞皆受版權保護，建議直接前往合法授權平台（如 KKBOX、Musixmatch 或 Google 歌詞專區）瀏覽全文。</p>
+    `;
 
-    let activeGanZhi = { yearGan:"甲", yearZhi:"子", monthGan:"丙", monthZhi:"寅", dayGan:"甲", dayZhi:"子", hourGan:"甲", hourZhi:"子", xunKong:"戌亥" };
-
-    const gans = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
-    const zhis = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
-    const wuxing = {"子":"水", "亥":"水", "寅":"木", "卯":"木", "巳":"火", "午":"火", "申":"金", "酉":"金", "辰":"土", "戌":"土", "丑":"土", "未":"土"};
-    const wuxingRelation = {"水生木":1, "木生火":1, "火生土":1, "土生金":1, "金生水":1, "水克火":1, "火克金":1, "金克木":1, "木克土":1, "土克水":1};
-
-    const nayinMap = {
-        "甲子":"海中金", "乙丑":"海中金", "丙寅":"爐中火", "丁卯":"爐中火", "戊辰":"大林木", "己巳":"大林木", "庚午":"路邊土", "辛未":"路邊土", "壬申":"劍鋒金", "癸酉":"劍鋒金",
-        "甲戌":"山頭火", "乙亥":"山頭火", "丙子":"澗下水", "丁丑":"澗下水", "戊寅":"城頭土", "己卯":"城頭土", "庚辰":"白蠟金", "辛巳":"白蠟金", "壬午":"楊柳木", "癸未":"楊柳木",
-        "甲申":"泉中水", "乙酉":"泉中水", "丙戌":"屋上土", "丁亥":"屋上土", "戊子":"霹靂火", "己丑":"霹靂火", "庚寅":"松柏木", "辛卯":"松柏木", "壬辰":"長流水", "癸巳":"長流水",
-        "甲午":"沙中金", "乙未":"沙中金", "丙申":"山下火", "丁酉":"山下火", "戊戌":"平地木", "己亥":"平地木", "庚子":"壁上土", "辛丑":"壁上土", "壬寅":"金箔金", "癸卯":"金箔金",
-        "甲辰":"覆燈火", "乙巳":"覆燈火", "丙午":"天河水", "丁未":"天河水", "戊申":"大驛土", "己酉":"大驛土", "庚戌":"釵釧金", "辛亥":"釵釧金", "壬子":"桑柘木", "癸丑":"桑柘木",
-        "甲寅":"大溪水", "乙卯":"大溪水", "丙辰":"沙中土", "丁巳":"沙中土", "戊午":"天上火", "己未":"天上火", "庚申":"石榴木", "辛酉":"石榴木", "壬戌":"大海水", "癸亥":"大海水"
-    };
-
-    const naJiaBase = {
-        "乾": { low: { gan:["甲","甲","甲"], zhi:["子","寅","辰"] }, up: { gan:["壬","壬","壬"], zhi:["午","申","戌"] }, wuxing:"金" },
-        "震": { low: { gan:["庚","庚","庚"], zhi:["子","寅","辰"] }, up: { gan:["庚","庚","庚"], zhi:["午","申","戌"] }, wuxing:"木" },
-        "坎": { low: { gan:["戊","戊","戊"], zhi:["寅","辰","午"] }, up: { gan:["戊","戊","戊"], zhi:["申","戌","子"] }, wuxing:"水" },
-        "艮": { low: { gan:["丙","丙","丙"], zhi:["辰","午","申"] }, up: { gan:["丙","丙","丙"], zhi:["戌","子","寅"] }, wuxing:"土" },
-        "坤": { low: { gan:["乙","乙","乙"], zhi:["未","巳","卯"] }, up: { gan:["癸","癸","癸"], zhi:["丑","亥","酉"] }, wuxing:"土" },
-        "巽": { low: { gan:["辛","辛","辛"], zhi:["丑","亥","酉"] }, up: { gan:["辛","辛","辛"], zhi:["未","巳","卯"] }, wuxing:"木" },
-        "離": { low: { gan:["己","己","己"], zhi:["卯","丑","亥"] }, up: { gan:["己","己","己"], zhi:["酉","未","巳"] }, wuxing:"火" },
-        "兌": { low: { gan:["丁","丁","丁"], zhi:["巳","卯","丑"] }, up: { gan:["丁","丁","丁"], zhi:["亥","酉","未"] }, wuxing:"金" }
-    };
-
-    const baguaCode = {"111":"乾", "000":"坤", "100":"震", "011":"巽", "010":"坎", "101":"離", "001":"艮", "110":"兌"};
-    const baguaMing = {"乾":"天", "坤":"地", "震":"雷", "巽":"風", "坎":"水", "離":"火", "艮":"山", "兌":"澤"};
-
-    const guaName64 = {
-        "乾乾":"乾為天", "坤坤":"坤為地", "坎坎":"坎為水", "離離":"離為火", "震震":"震為雷", "巽巽":"巽為風", "艮艮":"艮為山", "兌兌":"兌為澤",
-        "坎乾":"水天需", "乾坎":"天水訟", "坤坎":"地水師", "坎坤":"水地比", "巽乾":"風天小畜", "乾兌":"天澤履", "坤乾":"地天泰", "乾坤":"天地否",
-        "乾離":"天火同人", "離乾":"火天大有", "坤艮":"地山謙", "震坤":"雷地豫", "兌震":"澤雷隨", "艮坤":"山地蠱", "坤兌":"地澤臨", "巽坤":"風地觀",
-        "離震":"火雷噬嗑", "艮離":"山火賁", "艮坤":"山地剝", "坤震":"地雷復", "乾震":"天雷無妄", "艮乾":"山天大畜", "艮震":"山雷頤", "兌巽":"澤風大過",
-        "坎艮":"水山蹇", "震坎":"雷水解", "艮兌":"山澤損", "震乾":"雷天大壯", "離坤":"火地晉", "坤離":"地火明夷", "巽離":"風火家人", "離兌":"火澤睽",
-        "坎兌":"水澤節", "巽兌":"風澤中孚", "震艮":"雷山小過", "坎離":"水火既濟", "離坎":"火水未濟", "乾巽":"天風姤", "兌坤":"澤地萃", "坤巽":"地風升",
-        "坎巽":"水風井", "兌離":"澤火革", "離巽":"火風鼎", "兌乾":"澤天嬖", "震巽":"雷風恆", "乾艮":"天山遁", "巽震":"風雷益", "兌坎":"澤水困",
-        "兌艮":"澤山咸", "震兌":"雷澤歸妹", "離艮":"火山旅", "巽艮":"風山漸", "坎震":"水雷屯", "艮巽":"山風蠱", "巽坎":"風水渙", "震離":"雷火豐", "艮坎":"山水蒙"
-    };
-
-    const jingFangEightGongs = {
-        "乾": ["乾為天", "天風姤", "天山遁", "天地否", "風地觀", "山地剝", "火地晉", "火天大有"],
-        "兌": ["兌為澤", "澤水困", "澤地萃", "澤山咸", "水山蹇", "地山謙", "雷山小過", "雷澤歸妹"],
-        "離": ["離為火", "火山旅", "火風鼎", "火水未濟", "山水蒙", "風水渙", "天水訟", "天火同人"],
-        "震": ["震為雷", "雷地豫", "雷水解", "雷風恆", "地風升", "水風井", "澤風大過", "澤雷隨"],
-        "巽": ["巽為風", "風天小畜", "風火家人", "風雷益", "天雷無妄", "火雷噬嗑", "山雷頤", "山風蠱"],
-        "坎": ["坎為水", "水澤節", "水雷屯", "水火既濟", "澤火革", "雷火豐", "地火明夷", "地水師"],
-        "艮": ["艮為山", "山火賁", "山天大畜", "山澤損", "火澤睽", "天澤履", "風澤中孚", "風山漸"],
-        "坤": ["坤為地", "地雷復", "地澤臨", "地天泰", "雷天大壯", "澤天嬖", "水天需", "水地比"]
-    };
-
-    const gongIndexToShiYao = [6, 1, 2, 3, 4, 5, 4, 3]; 
-
-    const yaoOptions = [
-        { value: 1, text: "少陽 ( — )" },
-        { value: 2, text: "少陰 ( -- -- )" },
-        { value: 3, text: "老陽 ( —  變)" },
-        { value: 0, text: "老陰 ( -- -- 變)" }
-    ];
-
-    function applyZoom() { 
-        // 行動裝置不進行強制放大
-        if(window.innerWidth > 600) {
-            document.body.style.transform = `scale(${currentScale})`; 
-        } else {
-            document.body.style.transform = "none";
-        }
-    }
-    function adjustZoom(amount) { currentScale = Math.min(Math.max(currentScale + amount, 0.4), 2.0); applyZoom(); }
-    function resetZoom() { currentScale = 1.05; applyZoom(); }
-
-    window.onload = function() {
-        let ySel = document.getElementById("year");
-        let mSel = document.getElementById("month");
-        let dSel = document.getElementById("date");
-        let hSel = document.getElementById("hour");
-        let minSel = document.getElementById("minute");
-        
-        for(let i=2020; i<=2045; i++) ySel.options.add(new Option(i, i));
-        for(let i=1; i<=12; i++) mSel.options.add(new Option(i, i));
-        for(let i=1; i<=31; i++) dSel.options.add(new Option(i, i));
-        for(let i=0; i<=23; i++) hSel.options.add(new Option(i+"點 ("+zhis[Math.floor((i+1)%24/2)]+"時)", i));
-        for(let i=0; i<=59; i++) minSel.options.add(new Option(i.toString().padStart(2, '0'), i));
-
-        initGanzhiSelectors();
-
-        for(let i=0; i<6; i++) {
-            let ySelect = document.getElementById(`yao-${i}`);
-            yaoOptions.forEach(opt => { ySelect.options.add(new Option(opt.text, opt.value)); });
-            ySelect.value = 1; 
-        }
-
-        let now = new Date();
-        ySel.value = now.getFullYear();
-        mSel.value = now.getMonth() + 1;
-        dSel.value = now.getDate();
-        hSel.value = now.getHours();
-        minSel.value = now.getMinutes();
-
-        autoCalcTimeGZ(); 
-        renderHistory();
-        applyZoom(); 
-    };
-
-    function initGanzhiSelectors() {
-        const ids = ["gz-year-gan", "gz-month-gan", "gz-day-gan", "gz-hour-gan"];
-        ids.forEach(id => {
-            let sel = document.getElementById(id);
-            sel.innerHTML = "";
-            gans.forEach(g => sel.options.add(new Option(g, g)));
-        });
-        const zids = ["gz-year-zhi", "gz-month-zhi", "gz-day-zhi", "gz-hour-zhi"];
-        zids.forEach(id => {
-            let sel = document.getElementById(id);
-            sel.innerHTML = "";
-            zhis.forEach(z => sel.options.add(new Option(z, z)));
-        });
-    }
-
-    function autoCalcTimeGZ() {
-        let year = parseInt(document.getElementById("year").value);
-        let month = parseInt(document.getElementById("month").value);
-        let date = parseInt(document.getElementById("date").value);
-        let hourVal = parseInt(document.getElementById("hour").value);
-
-        let baseDate = new Date(2026, 4, 26, 12, 0, 0); 
-        let targetDate = new Date(year, month - 1, date, 12, 0, 0);
-        let diffDays = Math.round((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
-        if (hourVal >= 23) { diffDays += 1; }
-
-        let dayGanIdx = (0 + (diffDays % 10) + 10) % 10;
-        let dayZhiIdx = (0 + (diffDays % 12) + 12) % 12;
-
-        let yearGanIdx = (year - 4) % 10; if(yearGanIdx < 0) yearGanIdx += 10;
-        let yearZhiIdx = (year - 4) % 12; if(yearZhiIdx < 0) yearZhiIdx += 12;
-
-        let monthZhiMap = [ "丑","寅","卯","辰","巳","午","未","申","酉","戌","亥","子" ];
-        let mZhiStr = monthZhiMap[(month - 1) % 12];
-        let startMonthGans = {"甲":2, "己":2, "乙":4, "庚":4, "丙":6, "辛":6, "丁":8, "壬":8, "戊":0, "癸":0};
-        let mStartIdx = startMonthGans[gans[yearGanIdx]];
-        let mOffset = (zhis.indexOf(mZhiStr) - 2 + 12) % 12;
-        let mGanStr = gans[(mStartIdx + mOffset) % 10];
-
-        let hZhiStr = zhis[Math.floor((hourVal + 1) % 24 / 2)];
-        let startHourGans = {"甲":0, "己":0, "乙":2, "庚":2, "丙":4, "辛":4, "丁":6, "壬":6, "戊":8, "癸":8};
-        let hStartIdx = startHourGans[gans[dayGanIdx]];
-        let hOffset = zhis.indexOf(hZhiStr);
-        let hGanStr = gans[(hStartIdx + hOffset) % 10];
-
-        document.getElementById("gz-year-gan").value = gans[yearGanIdx];
-        document.getElementById("gz-year-zhi").value = zhis[yearZhiIdx];
-        document.getElementById("gz-month-gan").value = mGanStr;
-        document.getElementById("gz-month-zhi").value = mZhiStr;
-        document.getElementById("gz-day-gan").value = gans[dayGanIdx];
-        document.getElementById("gz-day-zhi").value = zhis[dayZhiIdx];
-        document.getElementById("gz-hour-gan").value = hGanStr;
-        document.getElementById("gz-hour-zhi").value = hZhiStr;
-
-        syncManualGZ();
-    }
-
-    function syncManualGZ() {
-        activeGanZhi.yearGan = document.getElementById("gz-year-gan").value;
-        activeGanZhi.yearZhi = document.getElementById("gz-year-zhi").value;
-        activeGanZhi.monthGan = document.getElementById("gz-month-gan").value;
-        activeGanZhi.monthZhi = document.getElementById("gz-month-zhi").value;
-        activeGanZhi.dayGan = document.getElementById("gz-day-gan").value;
-        activeGanZhi.dayZhi = document.getElementById("gz-day-zhi").value;
-        activeGanZhi.hourGan = document.getElementById("gz-hour-gan").value;
-        activeGanZhi.hourZhi = document.getElementById("gz-hour-zhi").value;
-
-        let dgIdx = gans.indexOf(activeGanZhi.dayGan);
-        let dzIdx = zhis.indexOf(activeGanZhi.dayZhi);
-        let xunStart = (dzIdx - dgIdx + 12) % 12;
-        activeGanZhi.xunKong = zhis[(xunStart + 10) % 12] + zhis[(xunStart + 11) % 12];
-
-        document.getElementById("gz-xunkong-text").innerText = `(日空：${activeGanZhi.xunKong})`;
-
-        if(document.getElementById("paipan-board").style.display === "block") {
-            updateDisplay();
-        }
-    }
-
-    function manualSubmit() {
-        for(let i=0; i<6; i++) { currentGua[i] = parseInt(document.getElementById(`yao-${i}`).value); }
-        currentRecordId = Date.now(); 
-        document.getElementById("gua-notes").value = ""; 
-        updateDisplay();
-        saveToHistory();
-    }
-
-    function syncGuaToSelectors() {
-        for(let i=0; i<6; i++) { document.getElementById(`yao-${i}`).value = currentGua[i]; }
-    }
-    
-    function autoRoll() { 
-        currentGua = []; 
-        for(let i=0; i<6; i++) currentGua.push(Math.floor(Math.random()*4)); 
-        syncGuaToSelectors(); 
-        currentRecordId = Date.now(); 
-        document.getElementById("gua-notes").value = ""; 
-        updateDisplay(); 
-        saveToHistory();
-    }
-
-    function toggleNayin() {
-        showNayinState = !showNayinState;
-        let btn = document.getElementById("btn-nayin");
-        let elements = document.getElementsByClassName("nayin-box");
-        for(let el of elements) { el.style.display = showNayinState ? "inline-block" : "none"; }
-        if(showNayinState) btn.classList.add("active"); else btn.classList.remove("active");
-    }
-
-    function toggleFushen() {
-        showFushenState = !showFushenState;
-        let btn = document.getElementById("btn-fushen");
-        let fCol = document.getElementById("fushen-col-id");
-        if(fCol) { fCol.style.display = showFushenState ? "flex" : "none"; }
-        if(showFushenState) { btn.classList.add("active"); btn.innerText = "隱藏 藏爻"; } else { btn.classList.remove("active"); btn.innerText = "顯示 藏爻"; }
-    }
-
-    function toggleShensha() {
-        showShenshaState = !showShenshaState;
-        let btn = document.getElementById("btn-shensha");
-        let el = document.getElementById("shensha-line-id");
-        if(el) { el.style.display = showShenshaState ? "block" : "none"; }
-        if(showShenshaState) { btn.classList.add("active"); btn.innerText = "隱藏 神煞"; } else { btn.classList.remove("active"); btn.innerText = "顯示 神煞"; }
-    }
-
-    function checkChongHe(zhisArr) {
-        const chongPairs = [["子","午"], ["午","子"], ["丑","未"], ["未","丑"], ["寅","申"], ["申","寅"], ["卯","酉"], ["酉","卯"], ["辰","戌"], ["戌","辰"], ["巳","亥"], ["亥","巳"]];
-        const hePairs = [["子","丑"], ["丑","子"], ["寅","亥"], ["亥","寅"], ["卯","戌"], ["戌","卯"], ["辰","酉"], ["酉","辰"], ["巳","申"], ["申","巳"], ["午","未"], ["未","午"]];
-        let isChong = true; let isHe = true;
-        for(let i=0; i<3; i++) {
-            let zhiLow = zhisArr[i]; let zhiUp = zhisArr[i+3];
-            let matchChong = chongPairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchChong) isChong = false;
-            let matchHe = hePairs.some(p => p[0]===zhiLow && p[1]===zhiUp); if(!matchHe) isHe = false;
-        }
-        if(isChong) return "六沖";
-        if(isHe) return "六合";
-        return "";
-    }
-
-    function findGuaGongAndIndex(rawName) {
-        for (let gong in jingFangEightGongs) {
-            let idx = jingFangEightGongs[gong].indexOf(rawName);
-            if (idx !== -1) { return { gong: gong, index: idx }; }
-        }
-        return { gong: "乾", index: 0 }; 
-    }
-
-    function buildGuaDetails(guaArr) {
-        let lowStr = guaArr.slice(0,3).join(""); let upStr = guaArr.slice(3,6).join("");
-        let lowName = baguaCode[lowStr]; let upName = baguaCode[upStr];
-        
-        let combinedKey = upName + lowName;
-        let rawName = guaName64[combinedKey] || (baguaMing[upName] + baguaMing[lowName] + "卦");
-        
-        let findRes = findGuaGongAndIndex(rawName);
-        let finalGong = findRes.gong;
-        let gongIdx = findRes.index;
-        let shi = gongIndexToShiYao[gongIdx];
-
-        let patternList = [];
-        let lowData = naJiaBase[lowName].low; let upData = naJiaBase[upName].up;
-        let zhisOut = [];
-        for(let i=0; i<3; i++) zhisOut.push(lowData.zhi[i]);
-        for(let i=0; i<3; i++) zhisOut.push(upData.up ? upData.zhi[i] : naJiaBase[upName].up.zhi[i]);
-        
-        let chongHeRes = checkChongHe(zhisOut);
-        if(chongHeRes) patternList.push(chongHeRes);
-        
-        if (gongIdx === 6) patternList.push("游魂");
-        if (gongIdx === 7) patternList.push("歸魂");
-
-        let patternStr = patternList.length > 0 ? ` (${patternList.join('・')})` : "";
-        
-        let gansOut = [];
-        for(let i=0; i<3; i++) gansOut.push(lowData.gan[i]);
-        for(let i=0; i<3; i++) gansOut.push(naJiaBase[upName].up.gan[i]);
-
-        return { name: rawName, gong: finalGong, shi: shi, gans: gansOut, zhis: zhisOut, wuxing: naJiaBase[finalGong].wuxing, pattern: patternStr };
-    }
-
-    function getLiuQin(gongWX, yaoZhi) {
-        let yaoWX = wuxing[yaoZhi];
-        if (gongWX === yaoWX) return "兄弟";
-        if (wuxingRelation[gongWX + "生" + yaoWX]) return "子孫";
-        if (wuxingRelation[yaoWX + "生" + gongWX]) return "父母";
-        if (gongWX === "土" && yaoWX === "水") return "妻財"; 
-        if (gongWX === "金" && yaoWX === "木") return "妻財"; 
-        if (wuxingRelation[gongWX + "克" + yaoWX]) return "妻財";
-        if (wuxingRelation[yaoWX + "克" + gongWX]) return "官鬼";
-        return "未知";
-    }
-
-    // ➔ 【核心修正】：重新精準編排神煞算法
-    function getShenSha(dayGan, dayZhi, monthZhi) {
-        let sha = {}; 
-        const chong = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅","卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"};
-        
-        // 將星、桃花、驛馬、劫煞、華蓋
-        if(["亥","卯","未"].includes(dayZhi)) { sha["將星"]="卯"; sha["桃花"]="子"; sha["驛馬"]="巳"; sha["劫煞"]="申"; sha["華蓋"]="未"; }
-        else if(["寅","午","戌"].includes(dayZhi)) { sha["將星"]="午"; sha["桃花"]="卯"; sha["驛馬"]="申"; sha["劫煞"]="亥"; sha["華蓋"]="戌"; }
-        else if(["巳","酉","丑"].includes(dayZhi)) { sha["將星"]="酉"; sha["桃花"]="午"; sha["驛馬"]="亥"; sha["劫煞"]="寅"; sha["華蓋"]="丑"; }
-        else { sha["將星"]="子"; sha["桃花"]="酉"; sha["驛馬"]="寅"; sha["劫煞"]="巳"; sha["華蓋"]="辰"; }
-        sha["災煞"] = chong[sha["將星"]];
-        
-        // 貴人、日祿
-        if(["甲","戊"].includes(dayGan)) sha["貴人"]="丑未"; else if(["乙","己"].includes(dayGan)) sha["貴人"]="子申"; else if(["丙","丁"].includes(dayGan)) sha["貴人"]="亥酉"; else if(["庚","辛"].includes(dayGan)) sha["貴人"]="寅午"; else sha["貴人"]="卯巳";
-        sha["日祿"] = {"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}[dayGan];
-        
-        // 1. 【羊刃修正】：甲卯 乙辰 丙午 丁未 戊午 己未 庚酉 辛戌 壬子 癸丑
-        sha["羊刃"] = {"甲":"卯","乙":"寅","丙":"午","丁":"巳","戊":"午","己":"巳","庚":"酉","辛":"申","壬":"子","癸":"亥"}[dayGan];
-        
-        sha["文昌"] = {"甲":"巳","乙":"午","丙":"申","丁":"酉","戊":"申","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"卯"}[dayGan];
-        sha["天醫"] = zhis[(zhis.indexOf(monthZhi) - 1 + 12) % 12];
-        
-        // 2. 【天喜修正】：依月支對應（正月的季後地支起算戌，依次順排）
-        sha["天喜"] = {"寅":"戌","卯":"戌","辰":"戌","巳":"未","午":"未","未":"未","申":"辰","酉":"辰","戌":"辰","亥":"丑","子":"丑","丑":"丑"}[monthZhi];
-        
-        // 3. 【謀星修正】：根據日支查找三合局中土爻之相沖爻
-        if (["申","子","辰"].includes(dayZhi)) { sha["謀星"] = "戌"; } // 局中土為辰，沖辰者戌
-        else if (["巳","酉","丑"].includes(dayZhi)) { sha["謀星"] = "未"; } // 局中土為丑，沖丑者未
-        else if (["寅","午","戌"].includes(dayZhi)) { sha["謀星"] = "辰"; } // 局中土為戌，沖戌者辰
-        else if (["亥","卯","未"].includes(dayZhi)) { sha["謀星"] = "丑"; } // 局中土為未，沖未者丑
-        else { sha["謀星"] = "無"; }
-
-        return sha;
-    }
-
-    function calculateCangYaoDetails(mainInfo) {
-        let gongName = mainInfo.gong; 
-        let gongWX = mainInfo.wuxing;
-        let mainGuaLiuqins = [];
-        for(let i=0; i<6; i++) { mainGuaLiuqins.push(getLiuQin(gongWX, mainInfo.zhis[i])); }
-
-        let pureArr = [];
-        if(gongName==="乾") pureArr=[1,1,1,1,1,1];      
-        else if(gongName==="坤") pureArr=[0,0,0,0,0,0]; 
-        else if(gongName==="震") pureArr=[1,0,0,1,0,0]; 
-        else if(gongName==="巽") pureArr=[0,1,1,0,1,1]; 
-        else if(gongName==="坎") pureArr=[0,1,0,0,1,0]; 
-        else if(gongName==="離") pureArr=[1,0,1,1,0,1]; 
-        else if(gongName==="艮") pureArr=[0,0,1,0,0,1]; 
-        else if(gongName==="兌") pureArr=[1,1,0,1,1,0]; 
-        
-        let lowName = baguaCode[pureArr.slice(0,3).join("")]; 
-        let upName = baguaCode[pureArr.slice(3,6).join("")];
-        let lowData = naJiaBase[lowName].low; 
-        let upData = naJiaBase[upName].up;
-        
-        let pureGanzhi = [
-            { gan: lowData.gan[0], zhi: lowData.zhi[0] },
-            { gan: lowData.gan[1], zhi: lowData.zhi[1] },
-            { gan: lowData.gan[2], zhi: lowData.zhi[2] },
-            { gan: upData.gan[0], zhi: upData.zhi[0] },
-            { gan: upData.gan[1], zhi: upData.zhi[1] },
-            { gan: upData.gan[2], zhi: upData.zhi[2] }
-        ];
-
-        let resultList = []; 
-        for(let i=0; i<6; i++) {
-            let pureLQ = getLiuQin(gongWX, pureGanzhi[i].zhi);
-            let displayString = `${pureLQ}${pureGanzhi[i].zhi}${wuxing[pureGanzhi[i].zhi]}`;
-            let isFuYao = !mainGuaLiuqins.includes(pureLQ);
-            resultList.push({ text: displayString, isFu: isFuYao });
-        }
-        return resultList;
-    }
-
-    function updateDisplay() {
-        if (currentGua.length < 6) return;
-
-        let isQuietGua = !currentGua.some(y => y === 0 || y === 3);
-        let memo = document.getElementById("memo").value || "未填寫";
-        let year = parseInt(document.getElementById("year").value);
-        let month = parseInt(document.getElementById("month").value);
-        let date = parseInt(document.getElementById("date").value);
-        let hourVal = parseInt(document.getElementById("hour").value);
-        let minVal = document.getElementById("minute").value.padStart(2, '0'); 
-
-        let { yearGan, yearZhi, monthGan, monthZhi, dayGan, dayZhi, hourGan, hourZhi, xunKong } = activeGanZhi;
-
-        let sha = getShenSha(dayGan, dayZhi, monthZhi);
-        let liuShouOrder = {"甲":0,"乙":0,"丙":1,"丁":1,"戊":2,"己":3,"庚":4,"辛":4,"壬":5,"癸":5}[dayGan];
-        const liuShouArr = ["青龍", "朱雀", "勾陳", "螣蛇", "白虎", "玄武"];
-
-        let mainGuaArr = currentGua.map(y => (y === 1 || y === 3) ? 1 : 0);
-        let changeGuaArr = currentGua.map(y => (y === 1 || y === 0) ? 1 : 0);
-        
-        let mainInfo = buildGuaDetails(mainGuaArr);
-        let changeInfo = buildGuaDetails(changeGuaArr);
-        let cangYaoData = calculateCangYaoDetails(mainInfo);
-
-        let htm = "";
-        htm += `<div class="meta-section">`;
-        htm += `  <div class="meta-line"><b>占事備忘：</b><span class="highlight-blue">${memo}</span></div>`;
-        htm += `  <div class="meta-line"><b>西元時間：</b>${year} 年 ${month} 月 ${date} 日 ${hourVal} 時 ${minVal} 分</div>`;
-        htm += `  <div class="meta-line"><b>干支曆法：</b>${yearGan}${yearZhi}年 &nbsp;${monthGan}${monthZhi}月 &nbsp;${dayGan}${dayZhi}日 &nbsp;${hourGan}${hourZhi}時 &nbsp;&nbsp;(<span class="highlight-red">日空：${xunKong}</span>)</div>`;
-        
-        let ssDisplay = showShenshaState ? "block" : "none";
-        htm += `  <div class="shensha-line" id="shensha-line-id" style="display:${ssDisplay};">`;
-        htm += `    <div class="shensha-wrapper">`;
-        htm += `      <span class="shensha-title">神煞：</span>`;
-        htm += `      <span class="shensha-item">貴人[${sha["貴人"]}]</span>`;
-        htm += `      <span class="shensha-item">祿神[${sha["日祿"]}]</span>`;
-        htm += `      <span class="shensha-item">羊刃[${sha["羊刃"]}]</span>`;
-        htm += `      <span class="shensha-item">文昌[${sha["文昌"]}]</span>`;
-        htm += `      <span class="shensha-item">驛馬[${sha["驛馬"]}]</span>`;
-        htm += `      <span class="shensha-item">桃花[${sha["桃花"]}]</span>`;
-        htm += `      <span class="shensha-item">將星[${sha["將星"]}]</span>`;
-        htm += `      <span class="shensha-item">華蓋[${sha["華蓋"]}]</span>`;
-        htm += `      <span class="shensha-item">災煞[${sha["災煞"]}]</span>`;
-        htm += `      <span class="shensha-item">天醫[${sha["天醫"]}]</span>`;
-        htm += `      <span class="shensha-item">天喜[${sha["天喜"]}]</span>`;
-        htm += `      <span class="shensha-item">謀星[${sha["謀星"]}]</span>`;
-        htm += `    </div>`;
-        htm += `  </div>`;
-        htm += `</div>`;
-
-        htm += `<div class="paipan-grid">`;
-        htm += `  <div class="liushen-col">`;
-        for(let i=5; i>=0; i--) {
-            let lsName = liuShouArr[(liuShouOrder + i) % 6];
-            htm += `    <div class="yao-row"><b>${lsName}</b></div>`;
-        }
-        htm += `  </div>`;
-
-        let fDisplay = showFushenState ? "flex" : "none";
-        htm += `  <div class="fushen-col" id="fushen-col-id" style="display:${fDisplay};">`;
-        for(let i=5; i>=0; i--) {
-            let cy = cangYaoData[i];
-            htm += `    <div class="yao-row">`;
-            if(cy.isFu) { htm += `<span class="fushen-star">★</span><span class="hidden-yao-highlight">${cy.text}</span>`; } 
-            else { htm += `<span class="hidden-yao-normal">&nbsp;&nbsp;${cy.text}</span>`; }
-            htm += `    </div>`;
-        }
-        htm += `  </div>`;
-
-        htm += `  <div class="gua-col">`;
-        htm += `    <div class="gua-header">`;
-        htm += `      <div class="gua-title">本卦：${mainInfo.gong}宮 [${mainInfo.wuxing}]：${mainInfo.name}${mainInfo.pattern}</div>`;
-        if(!isQuietGua) {
-            htm += `      <div class="gua-title change-title">變卦：${changeInfo.gong}宮 [${changeInfo.wuxing}]：${changeInfo.name}${changeInfo.pattern}</div>`;
-        }
-        htm += `    </div>`;
-
-        for(let i=5; i>=0; i--) {
-            htm += `    <div class="yao-row">`;
-            
-            htm += `      <div class="yao-part">`;
-            let mLQ = getLiuQin(mainInfo.wuxing, mainInfo.zhis[i]);
-            let mGan = mainInfo.gans[i];
-            let mZhi = mainInfo.zhis[i];
-            let mWX = wuxing[mZhi];
-            let mNy = nayinMap[mGan+mZhi] || "";
-            let nyDisp = showNayinState ? "inline-block" : "none";
-            
-            htm += `        <span class="liuqin-zhi">${mLQ}${mZhi}${mWX}</span>`;
-            htm += `        <span class="nayin-box" style="display:${nyDisp};">[${mNy}]</span>`;
-            
-            let lineType = (currentGua[i] === 1 || currentGua[i] === 3) ? "yang" : "yin";
-            htm += `        <span class="yao-line-container"><span class="yao-line-pic ${lineType}"></span></span>`;
-            
-            let seStr = "";
-            if(mainInfo.shi === (i+1)) seStr = "世";
-            else if(mainInfo.shi > 3 && (mainInfo.shi-3) === (i+1)) seStr = "應";
-            else if(mainInfo.shi <= 3 && (mainInfo.shi+3) === (i+1)) seStr = "應";
-            htm += `        <span class="shi-ying">${seStr}</span>`;
-            
-            let mDong = "";
-            if(currentGua[i] === 3) mDong = "○";
-            if(currentGua[i] === 0) mDong = "×";
-            htm += `        <span class="dong-mark">${mDong}</span>`;
-            htm += `      </div>`;
-
-            if(!isQuietGua) {
-                htm += `      <div class="yao-part change-part">`;
-                let cLQ = getLiuQin(mainInfo.wuxing, changeInfo.zhis[i]);
-                let cGan = changeInfo.gans[i];
-                let cZhi = changeInfo.zhis[i];
-                let cWX = wuxing[cZhi];
-                let cNy = nayinMap[cGan+cZhi] || "";
-                
-                htm += `        <span class="liuqin-zhi">${cLQ}${cZhi}${cWX}</span>`;
-                htm += `        <span class="nayin-box" style="display:${nyDisp};">[${cNy}]</span>`;
-                
-                let cLineType = (changeGuaArr[i] === 1) ? "yang" : "yin";
-                htm += `        <span class="yao-line-container"><span class="yao-line-pic ${cLineType}"></span></span>`;
-                
-                let cSeStr = "";
-                if(changeInfo.shi === (i+1)) cSeStr = "世";
-                else if(changeInfo.shi > 3 && (changeInfo.shi-3) === (i+1)) cSeStr = "應";
-                else if(changeInfo.shi <= 3 && (changeInfo.shi+3) === (i+1)) cSeStr = "應";
-                htm += `        <span class="shi-ying">${cSeStr}</span>`;
-                htm += `      </div>`;
+    /* 
+    // 方案 B：若您有自己的後端伺服器 API，可以使用 fetch 方式抓取並顯示在頁面上：
+    fetch(`https://your-api-domain.com/get-lyrics?song=${encodeURIComponent(songName)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.lyrics) {
+                resultDiv.textContent = data.lyrics;
+            } else {
+                resultDiv.textContent = "找不到相關歌詞。";
             }
-            htm += `    </div>`;
-        }
-        htm += `  </div>`;
-        htm += `</div>`;
-
-        document.getElementById("board-content").innerHTML = htm;
-        document.getElementById("board-controls").style.display = "flex";
-        document.getElementById("paipan-board").style.display = "block";
-        
-        let btnNayin = document.getElementById("btn-nayin");
-        if(showNayinState) btnNayin.classList.add("active"); else btnNayin.classList.remove("active");
-        let btnFushen = document.getElementById("btn-fushen");
-        if(showFushenState) { btnFushen.classList.add("active"); btnFushen.innerText="隱藏 藏爻"; } else { btnFushen.classList.remove("active"); btnFushen.innerText="顯示 藏爻"; }
-        let btnShensha = document.getElementById("btn-shensha");
-        if(showShenshaState) { btnShensha.classList.add("active"); btnShensha.innerText="隱藏 神煞"; } else { btnShensha.classList.remove("active"); btnShensha.innerText="顯示 神煞"; }
-    }
-
-    function saveToHistory() {
-        if(!currentRecordId) return;
-        let memo = document.getElementById("memo").value || "未填寫";
-        let year = document.getElementById("year").value;
-        let month = document.getElementById("month").value;
-        let date = document.getElementById("date").value;
-        let hour = document.getElementById("hour").value;
-        let min = document.getElementById("minute").value;
-        let notes = document.getElementById("gua-notes").value;
-
-        let mainGuaArr = currentGua.map(y => (y === 1 || y === 3) ? 1 : 0);
-        let mainInfo = buildGuaDetails(mainGuaArr);
-
-        let record = {
-            id: currentRecordId,
-            memo: memo,
-            timeStr: `${year}-${month}-${date} ${hour.padStart(2,'0')}:${min.padStart(2,'0')}`,
-            ganzhiStr: `${activeGanZhi.dayGan}${activeGanZhi.dayZhi}日(${activeGanZhi.monthZhi}月)`,
-            guaName: mainInfo.name,
-            guaData: [...currentGua],
-            notes: notes,
-            inputs: { year, month, date, hour, min },
-            savedGZ: { ...activeGanZhi }
-        };
-
-        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
-        let idx = history.findIndex(r => r.id === currentRecordId);
-        if(idx !== -1) { history[idx] = record; } else { history.unshift(record); }
-        localStorage.setItem("liuxiao_history", JSON.stringify(history));
-        renderHistory();
-    }
-
-    function autoSaveNotes() {
-        if(!currentRecordId) return;
-        let statusEl = document.getElementById("save-status");
-        statusEl.innerText = "正在儲存...";
-        saveToHistory();
-        setTimeout(() => { statusEl.innerText = "筆記已自動儲存"; }, 400);
-    }
-
-    function renderHistory() {
-        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
-        let container = document.getElementById("history-container");
-        if(history.length === 0) {
-            container.innerHTML = `<div style="padding:10px; color:#666; text-align:center;">暫無占卦紀錄</div>`;
-            return;
-        }
-        let htm = "";
-        history.forEach(r => {
-            htm += `<div class="history-item">`;
-            htm += `  <div class="history-info" onclick="loadRecord(${r.id})">`;
-            htm += `    <span style="color:#ffca28; font-weight:bold;">[${r.guaName}]</span> `;
-            htm += `    <span style="color:#fff;">${r.memo}</span> `;
-            htm += `    <span style="color:#888; font-size:12px;">(${r.timeStr} | ${r.ganzhiStr})</span>`;
-            htm += `  </div>`;
-            htm += `  <button style="background:#444; font-size:12px; padding:1px 5px;" onclick="deleteRecord(${r.id})">刪除</button>`;
-            htm += `</div>`;
+        })
+        .catch(err => {
+            resultDiv.textContent = "查詢時發生錯誤，請稍後再試。";
         });
-        container.innerHTML = htm;
-    }
-
-    function loadRecord(id) {
-        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
-        let r = history.find(item => item.id === id);
-        if(!r) return;
-
-        currentRecordId = r.id;
-        currentGua = [...r.guaData];
-        syncGuaToSelectors();
-
-        document.getElementById("memo").value = r.memo;
-        if(r.inputs) {
-            document.getElementById("year").value = r.inputs.year;
-            document.getElementById("month").value = r.inputs.month;
-            document.getElementById("date").value = r.inputs.date;
-            document.getElementById("hour").value = r.inputs.hour;
-            document.getElementById("minute").value = r.inputs.min;
-        }
-        document.getElementById("gua-notes").value = r.notes || "";
-        document.getElementById("save-status").innerText = "";
-        
-        if(r.savedGZ) {
-            document.getElementById("gz-year-gan").value = r.savedGZ.yearGan;
-            document.getElementById("gz-year-zhi").value = r.savedGZ.yearZhi;
-            document.getElementById("gz-month-gan").value = r.savedGZ.monthGan;
-            document.getElementById("gz-month-zhi").value = r.savedGZ.monthZhi;
-            document.getElementById("gz-day-gan").value = r.savedGZ.dayGan;
-            document.getElementById("gz-day-zhi").value = r.savedGZ.dayZhi;
-            document.getElementById("gz-hour-gan").value = r.savedGZ.hourGan;
-            document.getElementById("gz-hour-zhi").value = r.savedGZ.hourZhi;
-            syncManualGZ();
-        } else {
-            autoCalcTimeGZ();
-        }
-    }
-
-    function deleteRecord(id) {
-        let history = JSON.parse(localStorage.getItem("liuxiao_history") || "[]");
-        history = history.filter(item => item.id !== id);
-        localStorage.setItem("liuxiao_history", JSON.stringify(history));
-        if(currentRecordId === id) {
-            currentRecordId = null;
-            document.getElementById("paipan-board").style.display = "none";
-            document.getElementById("board-controls").style.display = "none";
-        }
-        renderHistory();
-    }
-
-    function clearHistory() {
-        if(confirm("確定要清空所有歷史占卦紀錄嗎？")) {
-            localStorage.removeItem("liuxiao_history");
-            currentRecordId = null;
-            document.getElementById("paipan-board").style.display = "none";
-            document.getElementById("board-controls").style.display = "none";
-            renderHistory();
-        }
-    }
+    */
+}
 </script>
 
 </body>
