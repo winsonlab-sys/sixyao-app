@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes">
-    <title>專業六爻排盤系統 V8.7</title>
+    <title>專業六爻排盤系統 V8.8 (六親右置版)</title>
     <style>
         body {
             font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -186,15 +186,15 @@
 
         .yao-row { display: flex; align-items: center; height: 32px; }
         
-        /* 統一主卦與變卦欄位寬度與對齊 */
-        .yao-part { width: 270px; display: flex; align-items: center; position: relative; margin-right: 10px; color: #1e293b; }
+        /* ➔ 【V8.8 調整】：設定主卦與變卦元件寬度，使六親與動爻標籤完全右置 */
+        .yao-part { width: 275px; display: flex; align-items: center; position: relative; margin-right: 10px; color: #1e293b; }
         .yao-part.change-part { width: 250px; margin-right: 0; color: #1e293b; } 
         
-        .liuqin-zhi { width: 80px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; }
+        .liuqin-zhi { width: 90px; display: inline-block; letter-spacing: 0.5px; white-space: nowrap; margin-left: 8px; }
         .nayin-box { width: 65px; display: none; font-size: 12px; color: #64748b; font-weight: normal; white-space: nowrap; text-align: left; }
         .yao-line-container { width: 85px; display: inline-flex; align-items: center; justify-content: center; }
-        .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 14px; }
-        .dong-mark { width: 40px; text-align: left; color: #dc2626; font-weight: bold; font-size: 14px; padding-left: 2px; }
+        .shi-ying { width: 25px; text-align: center; color: #b45309; font-size: 14px; margin-left: 4px; }
+        .dong-mark { width: 40px; text-align: left; color: #dc2626; font-weight: bold; font-size: 14px; padding-left: 4px; }
         
         .yao-line-pic { display: inline-block; height: 10px; vertical-align: middle; }
         .yao-line-pic.yang { width: 75px; background-color: #000; }
@@ -276,7 +276,7 @@
 </head>
 <body>
 
-    <h1>專業六爻排盤系統 V8.7</h1>
+    <h1>專業六爻排盤系統 V8.8</h1>
 
     <div class="card">
         <div class="form-group">
@@ -407,7 +407,6 @@
     const baguaCode = {"111":"乾", "000":"坤", "100":"震", "011":"巽", "010":"坎", "101":"離", "001":"艮", "110":"兌"};
     const baguaMing = {"乾":"天", "坤":"地", "震":"雷", "巽":"風", "坎":"水", "離":"火", "艮":"山", "兌":"澤"};
 
-    // ➔ 【V8.7 修正】：修正澤天夬錯字
     const guaName64 = {
         "乾乾":"乾為天", "坤坤":"坤為地", "坎坎":"坎為水", "離離":"離為火", "震震":"震為雷", "巽巽":"巽為風", "艮艮":"艮為山", "兌兌":"兌為澤",
         "坎乾":"水天需", "乾坎":"天水訟", "坤坎":"地水師", "坎坤":"水地比", "巽乾":"風天小畜", "乾兌":"天澤履", "坤乾":"地天泰", "乾坤":"天地否",
@@ -684,7 +683,6 @@
         return "未知";
     }
 
-    // ➔ 【V8.7 修正】：羊刃按指定邏輯更新
     function getShenSha(dayGan, dayZhi, monthZhi) {
         let sha = {}; 
         
@@ -696,7 +694,6 @@
         if(["甲","戊"].includes(dayGan)) sha["貴人"]="丑未"; else if(["乙","己"].includes(dayGan)) sha["貴人"]="子申"; else if(["丙","丁"].includes(dayGan)) sha["貴人"]="亥酉"; else if(["庚","辛"].includes(dayGan)) sha["貴人"]="寅午"; else sha["貴人"]="卯巳";
         sha["日祿"] = {"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}[dayGan];
         
-        // 【羊刃修正】：甲卯/乙寅/丙戊午/丁己巳/庚酉/辛申/壬子/癸亥
         sha["羊刃"] = {
             "甲":"卯", "乙":"寅",
             "丙":"午", "丁":"巳", "戊":"午", "己":"巳",
@@ -838,7 +835,7 @@
         for(let i=5; i>=0; i--) {
             htm += `    <div class="yao-row">`;
             
-            // ➔ 【V8.7 修正】：主卦對齊與動爻箭頭標示 (O → / X →)
+            // ➔ 【V8.8 修正】：主卦元件調整為「卦圖在左、六親干支在右」[cite: 13]
             htm += `      <div class="yao-part">`;
             let mLQ = getLiuQin(mainInfo.wuxing, mainInfo.zhis[i]);
             let mGan = mainInfo.gans[i];
@@ -847,25 +844,30 @@
             let mNy = nayinMap[mGan+mZhi] || "";
             let nyDisp = showNayinState ? "inline-block" : "none";
             
-            htm += `        <span class="liuqin-zhi">${mLQ}${mZhi}${mWX}</span>`;
-            htm += `        <span class="nayin-box" style="display:${nyDisp};">[${mNy}]</span>`;
-            
+            // 1. 先畫陰陽爻圖[cite: 13]
             let lineType = (currentGua[i] === 1 || currentGua[i] === 3) ? "yang" : "yin";
             htm += `        <span class="yao-line-container"><span class="yao-line-pic ${lineType}"></span></span>`;
             
+            // 2. 放六親＋地支五行（置於右側）[cite: 13]
+            htm += `        <span class="liuqin-zhi">${mLQ}${mZhi}${mWX}</span>`;
+            htm += `        <span class="nayin-box" style="display:${nyDisp};">[${mNy}]</span>`;
+            
+            // 3. 放世/應[cite: 13]
             let seStr = "";
             if(mainInfo.shi === (i+1)) seStr = "世";
             else if(mainInfo.shi > 3 && (mainInfo.shi-3) === (i+1)) seStr = "應";
             else if(mainInfo.shi <= 3 && (mainInfo.shi+3) === (i+1)) seStr = "應";
             htm += `        <span class="shi-ying">${seStr}</span>`;
             
+            // 4. 動爻標示 (O → / X →)[cite: 13]
             let mDong = "";
-            if(currentGua[i] === 3) mDong = "O →"; // 老陽變陰
-            if(currentGua[i] === 0) mDong = "X →"; // 老陰變陽
+            if(currentGua[i] === 3) mDong = "O →"; 
+            if(currentGua[i] === 0) mDong = "X →"; 
             htm += `        <span class="dong-mark">${mDong}</span>`;
             htm += `      </div>`;
 
             if(!isQuietGua) {
+                // ➔ 【V8.8 修正】：變卦同樣調整為「卦圖在左、六親干支在右」[cite: 13]
                 htm += `      <div class="yao-part change-part">`;
                 let cLQ = getLiuQin(mainInfo.wuxing, changeInfo.zhis[i]);
                 let cGan = changeInfo.gans[i];
@@ -873,12 +875,15 @@
                 let cWX = wuxing[cZhi];
                 let cNy = nayinMap[cGan+cZhi] || "";
                 
-                htm += `        <span class="liuqin-zhi">${cLQ}${cZhi}${cWX}</span>`;
-                htm += `        <span class="nayin-box" style="display:${nyDisp};">[${cNy}]</span>`;
-                
+                // 1. 先畫陰陽爻圖[cite: 13]
                 let cLineType = (changeGuaArr[i] === 1) ? "yang" : "yin";
                 htm += `        <span class="yao-line-container"><span class="yao-line-pic ${cLineType}"></span></span>`;
                 
+                // 2. 放六親＋地支五行（置於右側）[cite: 13]
+                htm += `        <span class="liuqin-zhi">${cLQ}${cZhi}${cWX}</span>`;
+                htm += `        <span class="nayin-box" style="display:${nyDisp};">[${cNy}]</span>`;
+                
+                // 3. 放世/應[cite: 13]
                 let cSeStr = "";
                 if(changeInfo.shi === (i+1)) cSeStr = "世";
                 else if(changeInfo.shi > 3 && (changeInfo.shi-3) === (i+1)) cSeStr = "應";
